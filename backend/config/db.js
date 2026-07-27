@@ -7,13 +7,18 @@ const connection = mysql.createConnection({
     database: process.env.DB_NAME
 });
 
-connection.connect((err) => {
-    if (err) {
-        console.log("Database connection failed");
-        console.log(err);
-    } else {
-        console.log("Database connected");
-    }
-});
+const connectDB = () => {
+    return new Promise((resolve, reject) => {
+        connection.connect((err) => {
+            if (err) {
+                console.log("Database connection failed");
+                reject(err);
+            } else {
+                console.log("Database connected");
+                resolve();
+            }
+        });
+    });
+};
 
-module.exports = connection;
+module.exports = { connection, connectDB };
