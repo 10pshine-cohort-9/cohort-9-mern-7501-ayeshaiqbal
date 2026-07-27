@@ -4,7 +4,7 @@ const findUserByEmail = (email, callback) => {
 
     const query = "SELECT * FROM users WHERE email = ?";
 
-    connection.query(query, [email], callback);
+    pool.query(query, [email], callback);
 };
 
 
@@ -15,7 +15,7 @@ const createUser = (name, email, password, callback) => {
         VALUES (?, ?, ?)
     `;
 
-    connection.query(query, [name, email, password], callback);
+    pool.query(query, [name, email, password], callback);
 };
 
 
