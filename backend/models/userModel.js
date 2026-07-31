@@ -4,9 +4,8 @@ const findUserByEmail = (email, callback) => {
 
     const query = "SELECT * FROM users WHERE email = ?";
 
-    pool.query(query, [email], callback);
+    connection.query(query, [email], callback);
 };
-
 
 const createUser = (name, email, password, callback) => {
 
@@ -15,9 +14,8 @@ const createUser = (name, email, password, callback) => {
         VALUES (?, ?, ?)
     `;
 
-    pool.query(query, [name, email, password], callback);
+    connection.query(query, [name, email, password], callback);
 };
-
 
 module.exports = {
     findUserByEmail,
