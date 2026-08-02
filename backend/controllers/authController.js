@@ -27,25 +27,26 @@ const signup = (req, res) => {
         try {
             const hashedPassword = await bcrypt.hash(password, 10);
 
-        createUser(name, email, hashedPassword, (err, result) => {
+            createUser(name, email, hashedPassword, (err, result) => {
 
-    if (err) {
+                if (err) {
 
-        if (err.code === "ER_DUP_ENTRY") {
-            return res.status(400).json({
-                message: "Email already exists"
+                    if (err.code === "ER_DUP_ENTRY") {
+                        return res.status(400).json({
+                            message: "Email already exists"
+                        });
+                    }
+
+                    return res.status(500).json({
+                        message: "User not created"
+                    });
+                }
+
+                res.status(201).json({
+                    message: "User registered successfully"
+                });
             });
-        }
 
-        return res.status(500).json({
-            message: "User not created"
-        });
-    }
-
-    res.status(201).json({
-        message: "User registered successfully"
-    });
-});
         } catch (error) {
             console.error(error);
             return res.status(500).json({
@@ -111,6 +112,7 @@ const login = (req, res) => {
                     email: user.email
                 }
             });
+
         } catch (error) {
             console.error(error);
             return res.status(500).json({
@@ -120,7 +122,15 @@ const login = (req, res) => {
     });
 };
 
+// Logout Controller
+const logout = (req, res) => {
+    return res.status(200).json({
+        message: "Logout successful"
+    });
+};
+
 module.exports = {
     signup,
-    login
+    login,
+    logout
 };
