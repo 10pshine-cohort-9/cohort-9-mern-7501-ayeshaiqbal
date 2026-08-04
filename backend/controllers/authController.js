@@ -1,135 +1,116 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const logger = require("../utils/logger");
 const { findUserByEmail, createUser } = require("../models/userModel");
 
-const signup = (req, res) => {
-    const { name, email, password } = req.body;
+const signup = (req, res, next) => {
+  const { name, email, password } = req.body;
 
-    if (!name || !email || !password) {
-        return res.status(400).json({
-            message: "All fields are required"
-        });
+  logger.info({ email }, "Signup attempt");
+
+  if (!name || !email || !password) {
+    logger.warn({ email }, "Signup failed - required fields missing");
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  findUserByEmail(email, async (err, result) => {
+    if (err) {
+      logger.error({ error: err.message }, "Signup database error");
+      err.status = 500;
+      return next(err);
     }
 
-    findUserByEmail(email, async (err, result) => {
-        if (err) {
-            return res.status(500).json({
-                message: "Something went wrong"
-            });
-        }
-
-        if (result.length > 0) {
-            return res.status(400).json({
-                message: "Email already exists"
-            });
-        }
-
-        try {
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            createUser(name, email, hashedPassword, (err, result) => {
-
-                if (err) {
-
-                    if (err.code === "ER_DUP_ENTRY") {
-                        return res.status(400).json({
-                            message: "Email already exists"
-                        });
-                    }
-
-                    return res.status(500).json({
-                        message: "User not created"
-                    });
-                }
-
-                res.status(201).json({
-                    message: "User registered successfully"
-                });
-            });
-
-        } catch (error) {
-            console.error(error);
-            return res.status(500).json({
-                message: "Something went wrong"
-            });
-        }
-    });
-};
-
-const login = (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        return res.status(400).json({
-            message: "Email and password are required"
-        });
+    if (result.length > 0) {
+      logger.warn({ email }, "Signup failed - email already exists");
+      return res.status(400).json({ message: "Email already exists" });
     }
 
-    findUserByEmail(email, async (err, result) => {
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      createUser(name, email, hashedPassword, (err) => {
         if (err) {
-            return res.status(500).json({
-                message: "Something went wrong"
-            });
+          logger.error({ error: err.message }, "User creation failed");
+
+          if (err.code === "ER_DUP_ENTRY") {
+            logger.warn({ email }, "Signup failed - duplicate email");
+            return res.status(400).json({ message: "Email already exists" });
+          }
+
+          err.status = 500;
+          return next(err);
         }
 
-        if (result.length === 0) {
-            return res.status(400).json({
-                message: "Invalid email or password"
-            });
-        }
-
-        try {
-            const user = result[0];
-
-            const isPasswordCorrect = await bcrypt.compare(
-                password,
-                user.password
-            );
-
-            if (!isPasswordCorrect) {
-                return res.status(400).json({
-                    message: "Invalid email or password"
-                });
-            }
-
-            const token = jwt.sign(
-                {
-                    id: user.id,
-                },
-                process.env.JWT_SECRET,
-                {
-                    expiresIn: "1d"
-                }
-            );
-
-            res.status(200).json({
-                message: "Login successful",
-                token,
-                user: {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email
-                }
-            });
-
-        } catch (error) {
-            console.error(error);
-            return res.status(500).json({
-                message: "Something went wrong"
-            });
-        }
-    });
+        logger.info({ email }, "User signup successful");
+        return res
+          .status(201)
+          .json({ message: "User registered successfully" });
+      });
+    } catch (error) {
+      logger.error({ error: error.message }, "Signup error");
+      error.status = 500;
+      return next(error);
+    }
+  });
 };
 
-// Logout Controller
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  logger.info({ email }, "Login attempt");
+
+  if (!email || !password) {
+    logger.warn({ email }, "Login failed - missing credentials");
+    return res.status(400).json({ message: "Email and password are required" });
+  }
+
+  findUserByEmail(email, async (err, result) => {
+    if (err) {
+      logger.error({ error: err.message }, "Login database error");
+      err.status = 500;
+      return next(err);
+    }
+
+    if (result.length === 0) {
+      logger.warn({ email }, "Login failed - user not found");
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    try {
+      const user = result[0];
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordCorrect) {
+        logger.warn({ email }, "Login failed - invalid password");
+        return res.status(400).json({ message: "Invalid email or password" });
+      }
+
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+        expiresIn: "1d",
+      });
+
+      logger.info({ email, userId: user.id }, "Login successful");
+
+      return res.status(200).json({
+        message: "Login successful",
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
+      });
+    } catch (error) {
+      logger.error({ error: error.message }, "Login error");
+      error.status = 500;
+      return next(error);
+    }
+  });
+};
+
 const logout = (req, res) => {
-    return res.status(200).json({
-        message: "Logout successful"
-    });
+  logger.info("User logout successful");
+  return res.status(200).json({ message: "Logout successful" });
 };
 
-module.exports = {
-    signup,
-    login,
-    logout
-};
+module.exports = { signup, login, logout };
