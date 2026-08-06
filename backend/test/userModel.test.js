@@ -19,7 +19,13 @@ describe("User Model", () => {
 
     findUserByEmail("ayesha@test.com", callback);
 
-    expect(queryStub.calledOnce).to.equal(true);
+    expect(
+  queryStub.calledWith(
+    "SELECT * FROM users WHERE email = ?",
+    ["ayesha@test.com"],
+    callback,
+  ),
+).to.equal(true);
   });
 
   it("should call query to create user", () => {
@@ -29,6 +35,15 @@ describe("User Model", () => {
 
     createUser("Ayesha","ayesha@test.com","123456",callback);
 
-    expect(queryStub.calledOnce).to.equal(true);
+    expect(
+  queryStub.calledWith(
+    `
+        INSERT INTO users (name, email, password)
+        VALUES (?, ?, ?)
+    `,
+    ["Ayesha", "ayesha@test.com", "123456"],
+    callback,
+  ),
+).to.equal(true);
   });
 });
