@@ -242,7 +242,7 @@ function Login() {
                   Remember me
                 </label>
 
-                <button
+                <link
                   type="button"
                   className={`text-[11px] transition-colors ${
                     darkMode
@@ -251,7 +251,7 @@ function Login() {
                   }`}
                 >
                   Forgot Password?
-                </button>
+                </link>
               </div>
 
               {/* Error message */}

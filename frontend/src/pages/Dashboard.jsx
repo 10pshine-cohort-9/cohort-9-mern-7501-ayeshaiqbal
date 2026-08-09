@@ -1,9 +1,13 @@
 import { useAuth } from "../context/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 
 function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   const handleLogout = () => {
     logout();

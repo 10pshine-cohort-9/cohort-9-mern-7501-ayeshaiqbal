@@ -52,7 +52,7 @@ function Signup() {
     try {
       const data = await signupUser({ name, email, password });
       login(data.user, data.token);
-      navigate("/dashboard");
+      navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed. Please try again.");
     }
