@@ -51,7 +51,9 @@ function Signup() {
       await signupUser({ name, email, password });
       navigate("/login");
     } catch (err) {
-      setError(err.response?.data?.message || "Signup failed. Please try again.");
+      setError(
+        err.response?.data?.message || "Signup failed. Please try again.",
+      );
     }
   };
 
@@ -70,7 +72,9 @@ function Signup() {
     ? `${inputClass} bg-[#2F1D32] border-[#593750] text-white placeholder:text-[#9E899F] focus:border-[#C837AB]`
     : `${inputClass} bg-[#F3F4F6] border-[#D9DDE3] text-[#111827] placeholder:text-[#8B93A0] focus:border-[#A855F7]`;
 
-  const iconClass = darkMode ? "text-[#D2C4D3]" : "text-[#7D8795]";
+  const iconClass = darkMode
+    ? "text-[#D2C4D3]"
+    : "text-[#7D8795]";
 
   return (
     <div
@@ -86,9 +90,9 @@ function Signup() {
             : "bg-white border-gray-200"
         }`}
       >
-        <div className="h-full max-w-7xl mx-auto px-5 lg:px-8 flex items-center justify-between">
+        <div className="h-full max-w-[1100px] mx-auto px-4 flex items-center justify-between">
           {/* Logo */}
-          <Link to="/signup" className="flex items-center gap-2.5">
+          <Link to="/login" className="flex items-center gap-2">
             <BookOpen
               size={25}
               strokeWidth={2}
@@ -125,7 +129,6 @@ function Signup() {
       {/* ================= MAIN ================= */}
       <main className="flex justify-center px-4 py-5">
         <div className="w-full max-w-[420px]">
-
           {/* Heading */}
           <div className="text-center mb-4">
             <h1
@@ -162,7 +165,6 @@ function Signup() {
             }`}
           >
             <form onSubmit={handleSubmit} className="space-y-3">
-
               {/* Name */}
               <div>
                 <label
@@ -251,7 +253,9 @@ function Signup() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                     className={`absolute right-3 top-1/2 -translate-y-1/2 ${
                       darkMode
                         ? "text-[#C8B9C9] hover:text-white"
@@ -299,7 +303,11 @@ function Signup() {
                     onClick={() =>
                       setShowConfirmPassword((prev) => !prev)
                     }
-                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showConfirmPassword
+                        ? "Hide confirm password"
+                        : "Show confirm password"
+                    }
                     className={`absolute right-3 top-1/2 -translate-y-1/2 ${
                       darkMode
                         ? "text-[#C8B9C9] hover:text-white"
@@ -339,7 +347,9 @@ function Signup() {
 
               {/* Error message */}
               {error && (
-                <p className="text-red-400 text-[11px] text-center">{error}</p>
+                <p className="text-red-400 text-[11px] text-center">
+                  {error}
+                </p>
               )}
 
               {/* Button */}
@@ -373,3 +383,4 @@ function Signup() {
 }
 
 export default Signup;
+

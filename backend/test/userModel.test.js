@@ -20,12 +20,12 @@ describe("User Model", () => {
     findUserByEmail("ayesha@test.com", callback);
 
     expect(
-  queryStub.calledWith(
-    "SELECT * FROM users WHERE email = ?",
-    ["ayesha@test.com"],
-    callback,
-  ),
-).to.equal(true);
+      queryStub.calledWith(
+        "SELECT * FROM users WHERE email = ?",
+        ["ayesha@test.com"],
+        callback,
+      ),
+    ).to.equal(true);
   });
 
   it("should call query to create user", () => {
@@ -33,17 +33,23 @@ describe("User Model", () => {
 
     const callback = () => {};
 
-    createUser("Ayesha","ayesha@test.com","123456",callback);
+    createUser("Ayesha", "ayesha@test.com", "123456", callback);
 
-    expect(
-  queryStub.calledWith(
-    `
-        INSERT INTO users (name, email, password)
-        VALUES (?, ?, ?)
-    `,
-    ["Ayesha", "ayesha@test.com", "123456"],
-    callback,
-  ),
-).to.equal(true);
+    expect(queryStub.calledOnce).to.equal(true);
+
+    const [query, values, receivedCallback] = queryStub.firstCall.args;
+
+    expect(query.trim()).to.equal(
+      `INSERT INTO users (name, email, password)
+    VALUES (?, ?, ?)`,
+    );
+
+    expect(values).to.deep.equal([
+      "Ayesha",
+      "ayesha@test.com",
+      "123456",
+    ]);
+
+    expect(receivedCallback).to.equal(callback);
   });
 });
