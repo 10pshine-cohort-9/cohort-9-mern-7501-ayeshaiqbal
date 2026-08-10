@@ -11,12 +11,34 @@ function ProtectedRoute({ children }) {
   return user ? children : <Navigate to="/login" replace />;
 }
 
+function GuestRoute({ children }) {
+  const { user } = useContext(AuthContext);
+
+  return user ? <Navigate to="/dashboard" replace /> : children;
+}
+
 function App() {
+  const { user } = useContext(AuthContext);
+
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
+      <Route
+        path="/login"
+        element={
+          <GuestRoute>
+            <Login />
+          </GuestRoute>
+        }
+      />
 
-      <Route path="/signup" element={<Signup />} />
+      <Route
+        path="/signup"
+        element={
+          <GuestRoute>
+            <Signup />
+          </GuestRoute>
+        }
+      />
 
       <Route
         path="/dashboard"
@@ -27,12 +49,21 @@ function App() {
         }
       />
 
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route
+        path="/"
+        element={
+          <Navigate to={user ? "/dashboard" : "/login"} replace />
+        }
+      />
 
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route
+        path="*"
+        element={
+          <Navigate to={user ? "/dashboard" : "/login"} replace />
+        }
+      />
     </Routes>
   );
 }
 
 export default App;
-
