@@ -11,7 +11,6 @@ import {
   BookOpen,
 } from "lucide-react";
 import { signupUser } from "../api/authApi";
-import { useAuth } from "../context/useAuth";
 
 function Signup() {
   const [name, setName] = useState("");
@@ -24,7 +23,6 @@ function Signup() {
   const [agree, setAgree] = useState(false);
   const [error, setError] = useState("");
 
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const [darkMode, setDarkMode] = useState(() => {
@@ -50,8 +48,7 @@ function Signup() {
     }
 
     try {
-      const data = await signupUser({ name, email, password });
-      login(data.user, data.token);
+      await signupUser({ name, email, password });
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed. Please try again.");
@@ -169,6 +166,7 @@ function Signup() {
               {/* Name */}
               <div>
                 <label
+                  htmlFor="signup-name"
                   className={`block text-[12px] font-medium mb-1.5 ${
                     darkMode ? "text-white" : "text-[#172033]"
                   }`}
@@ -183,6 +181,7 @@ function Signup() {
                   />
 
                   <input
+                    id="signup-name"
                     type="text"
                     placeholder="Your full name"
                     value={name}
@@ -196,6 +195,7 @@ function Signup() {
               {/* Email */}
               <div>
                 <label
+                  htmlFor="signup-email"
                   className={`block text-[12px] font-medium mb-1.5 ${
                     darkMode ? "text-white" : "text-[#172033]"
                   }`}
@@ -210,6 +210,7 @@ function Signup() {
                   />
 
                   <input
+                    id="signup-email"
                     type="email"
                     placeholder="you@example.com"
                     value={email}
@@ -223,6 +224,7 @@ function Signup() {
               {/* Password */}
               <div>
                 <label
+                  htmlFor="signup-password"
                   className={`block text-[12px] font-medium mb-1.5 ${
                     darkMode ? "text-white" : "text-[#172033]"
                   }`}
@@ -237,6 +239,7 @@ function Signup() {
                   />
 
                   <input
+                    id="signup-password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Create a password"
                     value={password}
@@ -248,6 +251,7 @@ function Signup() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                     className={`absolute right-3 top-1/2 -translate-y-1/2 ${
                       darkMode
                         ? "text-[#C8B9C9] hover:text-white"
@@ -266,6 +270,7 @@ function Signup() {
               {/* Confirm Password */}
               <div>
                 <label
+                  htmlFor="signup-confirm-password"
                   className={`block text-[12px] font-medium mb-1.5 ${
                     darkMode ? "text-white" : "text-[#172033]"
                   }`}
@@ -280,6 +285,7 @@ function Signup() {
                   />
 
                   <input
+                    id="signup-confirm-password"
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm your password"
                     value={confirmPassword}
@@ -293,6 +299,7 @@ function Signup() {
                     onClick={() =>
                       setShowConfirmPassword((prev) => !prev)
                     }
+                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                     className={`absolute right-3 top-1/2 -translate-y-1/2 ${
                       darkMode
                         ? "text-[#C8B9C9] hover:text-white"

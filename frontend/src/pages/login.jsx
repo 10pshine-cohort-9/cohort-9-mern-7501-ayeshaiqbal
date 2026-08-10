@@ -157,6 +157,7 @@ function Login() {
               {/* Email */}
               <div>
                 <label
+                  htmlFor="login-email"
                   className={`block text-[12px] font-medium mb-1.5 ${
                     darkMode ? "text-white" : "text-[#172033]"
                   }`}
@@ -171,6 +172,7 @@ function Login() {
                   />
 
                   <input
+                    id="login-email"
                     type="email"
                     placeholder="you@example.com"
                     value={email}
@@ -184,6 +186,7 @@ function Login() {
               {/* Password */}
               <div>
                 <label
+                  htmlFor="login-password"
                   className={`block text-[12px] font-medium mb-1.5 ${
                     darkMode ? "text-white" : "text-[#172033]"
                   }`}
@@ -198,6 +201,7 @@ function Login() {
                   />
 
                   <input
+                    id="login-password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={password}
@@ -209,6 +213,7 @@ function Login() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                     className={`absolute right-3 top-1/2 -translate-y-1/2 ${
                       darkMode
                         ? "text-[#C8B9C9] hover:text-white"
@@ -242,8 +247,8 @@ function Login() {
                   Remember me
                 </label>
 
-                <link
-                  type="button"
+                <Link
+                  to="/login"
                   className={`text-[11px] transition-colors ${
                     darkMode
                       ? "text-[#9E91A3] hover:text-[#C837AB]"
@@ -251,7 +256,7 @@ function Login() {
                   }`}
                 >
                   Forgot Password?
-                </link>
+                </Link>
               </div>
 
               {/* Error message */}
