@@ -1,25 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  Sun,
-  Moon,
-  BookOpen,
-} from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Sun, Moon, BookOpen } from "lucide-react";
 import { loginUser } from "../api/authApi";
 import { useAuth } from "../context/useAuth";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState("");
-
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -40,20 +30,14 @@ function Login() {
       login(data.user, data.token);
       navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed. Please try again.");
+      setError(
+        err.response?.data?.message || "Login failed. Please try again."
+      );
     }
   };
 
-  const inputClass = `
-    w-full
-    h-[42px]
-    rounded-lg
-    border
-    px-3
-    outline-none
-    text-sm
-    transition-all
-  `;
+  const inputClass =
+    "w-full h-[42px] rounded-lg border px-3 outline-none text-sm transition-all";
 
   const fieldClass = darkMode
     ? `${inputClass} bg-[#2F1D32] border-[#593750] text-white placeholder:text-[#9E899F] focus:border-[#C837AB]`
@@ -67,7 +51,6 @@ function Login() {
         darkMode ? "bg-[#08060C]" : "bg-white"
       }`}
     >
-      {/* ================= NAVBAR ================= */}
       <header
         className={`h-[58px] border-b transition-colors duration-300 ${
           darkMode
@@ -76,17 +59,13 @@ function Login() {
         }`}
       >
         <div className="h-full max-w-7xl mx-auto px-5 lg:px-8 flex items-center justify-between">
-
-          {/* Logo */}
           <Link to="/login" className="flex items-center gap-2.5">
             <BookOpen
               size={25}
               strokeWidth={2}
-              className={`transition-colors duration-300 ${
-                darkMode ? "text-white" : "text-[#111827]"
-              }`}
+              aria-hidden="true"
+              className={darkMode ? "text-white" : "text-[#111827]"}
             />
-
             <span
               className={`text-[20px] font-bold tracking-tight ${
                 darkMode ? "text-white" : "text-[#111827]"
@@ -96,7 +75,6 @@ function Login() {
             </span>
           </Link>
 
-          {/* Theme */}
           <button
             type="button"
             onClick={() => setDarkMode((prev) => !prev)}
@@ -107,18 +85,18 @@ function Login() {
                 : "border-gray-200 bg-white text-[#7C3AED] hover:bg-gray-50"
             }`}
           >
-            {darkMode ? <Sun size={17} /> : <Moon size={17} />}
+            {darkMode ? (
+              <Sun size={17} aria-hidden="true" />
+            ) : (
+              <Moon size={17} aria-hidden="true" />
+            )}
           </button>
         </div>
       </header>
 
-      {/* ================= MAIN ================= */}
       <main className="flex justify-center px-4 py-7">
         <div className="w-full max-w-[420px]">
-
-          {/* Heading */}
           <div className="text-center mb-4">
-
             <h1
               className={`text-[22px] leading-tight font-bold tracking-tight ${
                 darkMode ? "text-white" : "text-[#111827]"
@@ -126,7 +104,6 @@ function Login() {
             >
               Sign In
             </h1>
-
             <p
               className={`mt-1 text-[14px] font-medium ${
                 darkMode ? "text-white" : "text-[#1F2937]"
@@ -134,7 +111,6 @@ function Login() {
             >
               Welcome Back
             </p>
-
             <p
               className={`mt-1 text-[12px] ${
                 darkMode ? "text-[#918599]" : "text-[#737B87]"
@@ -144,7 +120,6 @@ function Login() {
             </p>
           </div>
 
-          {/* ================= CARD ================= */}
           <div
             className={`rounded-xl border p-4.5 transition-colors duration-300 ${
               darkMode
@@ -153,8 +128,6 @@ function Login() {
             }`}
           >
             <form onSubmit={handleSubmit} className="space-y-3">
-
-              {/* Email */}
               <div>
                 <label
                   htmlFor="login-email"
@@ -164,13 +137,12 @@ function Login() {
                 >
                   Email Address
                 </label>
-
                 <div className="relative">
                   <Mail
                     size={16}
+                    aria-hidden="true"
                     className={`absolute left-3 top-1/2 -translate-y-1/2 ${iconClass}`}
                   />
-
                   <input
                     id="login-email"
                     type="email"
@@ -183,7 +155,6 @@ function Login() {
                 </div>
               </div>
 
-              {/* Password */}
               <div>
                 <label
                   htmlFor="login-password"
@@ -193,13 +164,12 @@ function Login() {
                 >
                   Password
                 </label>
-
                 <div className="relative">
                   <Lock
                     size={16}
+                    aria-hidden="true"
                     className={`absolute left-3 top-1/2 -translate-y-1/2 ${iconClass}`}
                   />
-
                   <input
                     id="login-password"
                     type={showPassword ? "text" : "password"}
@@ -209,11 +179,12 @@ function Login() {
                     className={`${fieldClass} pl-10 pr-10`}
                     required
                   />
-
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                     className={`absolute right-3 top-1/2 -translate-y-1/2 ${
                       darkMode
                         ? "text-[#C8B9C9] hover:text-white"
@@ -221,50 +192,34 @@ function Login() {
                     }`}
                   >
                     {showPassword ? (
-                      <EyeOff size={16} />
+                      <EyeOff size={16} aria-hidden="true" />
                     ) : (
-                      <Eye size={16} />
+                      <Eye size={16} aria-hidden="true" />
                     )}
                   </button>
                 </div>
               </div>
 
-              {/* Remember / Forgot */}
-              <div className="flex items-center justify-between pt-0.5">
+              <label
+                htmlFor="remember-me"
+                className={`flex items-center gap-2 text-[11px] cursor-pointer pt-0.5 ${
+                  darkMode ? "text-[#9E91A3]" : "text-[#69717D]"
+                }`}
+              >
+                <input
+                  id="remember-me"
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="w-3.5 h-3.5 accent-[#C837AB]"
+                />
+                Remember me
+              </label>
 
-                <label
-                  className={`flex items-center gap-2 text-[11px] cursor-pointer ${
-                    darkMode ? "text-[#9E91A3]" : "text-[#69717D]"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={remember}
-                    onChange={(e) => setRemember(e.target.checked)}
-                    className="w-3.5 h-3.5 accent-[#C837AB]"
-                  />
-
-                  Remember me
-                </label>
-
-                <Link
-                  to="/login"
-                  className={`text-[11px] transition-colors ${
-                    darkMode
-                      ? "text-[#9E91A3] hover:text-[#C837AB]"
-                      : "text-[#69717D] hover:text-[#C837AB]"
-                  }`}
-                >
-                  Forgot Password?
-                </Link>
-              </div>
-
-              {/* Error message */}
               {error && (
                 <p className="text-red-400 text-[12px] text-center">{error}</p>
               )}
 
-              {/* Button */}
               <button
                 type="submit"
                 className="w-full h-[42px] rounded-lg bg-gradient-to-r from-[#D21CFF] via-[#913CF5] to-[#477BFF] text-white text-[13px] font-semibold shadow-md shadow-purple-500/20 hover:brightness-110 active:scale-[0.99] transition-all"
@@ -274,7 +229,6 @@ function Login() {
             </form>
           </div>
 
-          {/* Bottom Link */}
           <p
             className={`text-[12px] text-center mt-3 ${
               darkMode ? "text-[#8E8195]" : "text-[#707783]"
@@ -295,3 +249,4 @@ function Login() {
 }
 
 export default Login;
+
