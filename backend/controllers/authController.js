@@ -11,6 +11,7 @@ const {
 } = require("../models/userModel");
 
 const { sendResetEmail } = require("../utils/mailer");
+
 const signup = (req, res, next) => {
   const { name, email, password } = req.body;
 
@@ -91,6 +92,7 @@ const signup = (req, res, next) => {
     }
   });
 };
+
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
@@ -183,7 +185,6 @@ const login = (req, res, next) => {
   });
 };
 
-
 const logout = (req, res) => {
   logger.info("User logout successful");
 
@@ -221,14 +222,16 @@ const forgotPassword = (req, res, next) => {
       return next(err);
     }
 
+    // Same response is returned whether the email exists or not.
     if (result.length === 0) {
       logger.warn(
         { email },
         "Forgot password - user not found"
       );
 
-      return res.status(404).json({
-        message: "No account found with this email",
+      return res.status(200).json({
+        message:
+          "If an account exists with this email, a password reset link has been sent.",
       });
     }
 
@@ -299,6 +302,7 @@ const forgotPassword = (req, res, next) => {
     );
   });
 };
+
 const resetPassword = async (req, res, next) => {
   const { token, password } = req.body;
 
@@ -356,10 +360,8 @@ const resetPassword = async (req, res, next) => {
         const hashedPassword =
           await bcrypt.hash(password, 10);
 
-        updatePassword(
-          user.id,
-          hashedPassword,
-          (err) => {
+      
+         updatePassword(user.id, token, hashedPassword, (err, result) =>{
             if (err) {
               logger.error(
                 {
@@ -372,6 +374,12 @@ const resetPassword = async (req, res, next) => {
               return next(err);
             }
 
+              if (result.affectedRows === 0) {
+    return res.status(400).json({
+      message: "Invalid or expired reset token",
+    });
+  }
+  
             logger.info(
               {
                 userId: user.id,

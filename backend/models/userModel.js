@@ -34,14 +34,16 @@ const findUserByResetToken = (token, callback) => {
   connection.query(query, [token], callback);
 };
 
-const updatePassword = (userId, password, callback) => {
+const updatePassword = (userId, token, password, callback) => {
   const query = `
     UPDATE users
     SET password = ?, reset_token = NULL, reset_token_expiry = NULL
     WHERE id = ?
+      AND reset_token = ?
+      AND reset_token_expiry > NOW()
   `;
 
-  connection.query(query, [password, userId], callback);
+  connection.query(query, [password, userId, token], callback);
 };
 
 module.exports = {

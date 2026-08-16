@@ -50,14 +50,11 @@ function App() {
           </GuestRoute>
         }
       />
-      <Route
-        path="/reset-password"
-        element={
-          <GuestRoute>
-            <ResetPassword />
-          </GuestRoute>
-        }
-      />
+      
+    <Route
+  path="/reset-password"
+  element={<ResetPassword />}
+/>
 
       <Route
         path="/dashboard"

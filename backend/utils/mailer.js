@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const logger = require("./logger");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -9,7 +10,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendResetEmail = async (email, resetToken) => {
-  const resetLink = `http://localhost:5173/reset-password?token=${encodeURIComponent(
+  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${encodeURIComponent(
     resetToken
   )}`;
 
@@ -31,7 +32,7 @@ const sendResetEmail = async (email, resetToken) => {
           Click the button below to create a new password:
         </p>
 
-        <a
+        <a 
           href="${resetLink}"
           style="
             display: inline-block;
@@ -62,7 +63,19 @@ const sendResetEmail = async (email, resetToken) => {
     `,
   };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    logger.error(
+      {
+        error: error.message,
+        email,
+      },
+      "Password reset email delivery failed"
+    );
+
+    throw error;
+  }
 };
 
 module.exports = {
