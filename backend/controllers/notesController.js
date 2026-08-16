@@ -6,6 +6,7 @@ const {
   deleteNote,
 } = require("../models/notesModel");
 
+
 const addNote = (req, res, next) => {
   const { title, content } = req.body;
   const userId = req.user.id;

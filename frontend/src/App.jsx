@@ -1,8 +1,12 @@
 import { useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+
 import Login from "./pages/login";
 import Signup from "./pages/signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
+
 import { AuthContext } from "./context/AuthContext.jsx";
 
 function ProtectedRoute({ children }) {
@@ -30,12 +34,27 @@ function App() {
           </GuestRoute>
         }
       />
-
       <Route
         path="/signup"
         element={
           <GuestRoute>
             <Signup />
+          </GuestRoute>
+        }
+      />
+      <Route
+        path="/forgot-password"
+        element={
+          <GuestRoute>
+            <ForgotPassword />
+          </GuestRoute>
+        }
+      />
+      <Route
+        path="/reset-password"
+        element={
+          <GuestRoute>
+            <ResetPassword />
           </GuestRoute>
         }
       />
@@ -52,14 +71,19 @@ function App() {
       <Route
         path="/"
         element={
-          <Navigate to={user ? "/dashboard" : "/login"} replace />
+          <Navigate
+            to={user ? "/dashboard" : "/login"}
+            replace
+          />
         }
       />
-
       <Route
         path="*"
         element={
-          <Navigate to={user ? "/dashboard" : "/login"} replace />
+          <Navigate
+            to={user ? "/dashboard" : "/login"}
+            replace
+          />
         }
       />
     </Routes>

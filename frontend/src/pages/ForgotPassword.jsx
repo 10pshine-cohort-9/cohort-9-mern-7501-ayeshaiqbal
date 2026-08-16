@@ -1,26 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  Sun,
-  Moon,
-  BookOpen,
-} from "lucide-react";
-import { loginUser } from "../api/authApi";
-import { useAuth } from "../context/useAuth";
+import { Link } from "react-router-dom";
+import { Mail, ArrowLeft, Sun, Moon, BookOpen } from "lucide-react";
+import { forgotPassword } from "../api/authApi";
 
-function Login() {
+function ForgotPassword() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(false);
+  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("theme") === "dark";
@@ -32,17 +19,32 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setMessage("");
     setError("");
+    setLoading(true);
 
     try {
-      const data = await loginUser({ email, password });
+      const data = await forgotPassword({ email });
 
-      login(data.user, data.token);
-      navigate("/dashboard");
+      setMessage(data.message || "Password reset link generated.");
+
+      // Development/testing ke liye token show kar rahe hain.
+      // Production mein ye token email ke through bhejna chahiye.
+      if (data.resetToken) {
+        setMessage(
+          `${data.message || "Password reset link generated."} Reset token generated successfully.`
+        );
+      }
+
+      setEmail("");
     } catch (err) {
       setError(
-        err.response?.data?.message || "Login failed. Please try again."
+        err.response?.data?.message ||
+          "Unable to process your request. Please try again."
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,6 +63,7 @@ function Login() {
         darkMode ? "bg-[#08060C]" : "bg-white"
       }`}
     >
+      {/* Header */}
       <header
         className={`h-[58px] border-b transition-colors duration-300 ${
           darkMode
@@ -105,15 +108,17 @@ function Login() {
         </div>
       </header>
 
+      {/* Main */}
       <main className="flex justify-center px-4 py-7">
         <div className="w-full max-w-[420px]">
+          {/* Heading */}
           <div className="text-center mb-4">
             <h1
               className={`text-[22px] leading-tight font-bold tracking-tight ${
                 darkMode ? "text-white" : "text-[#111827]"
               }`}
             >
-              Sign In
+              Forgot Password?
             </h1>
 
             <p
@@ -121,7 +126,7 @@ function Login() {
                 darkMode ? "text-white" : "text-[#1F2937]"
               }`}
             >
-              Welcome Back
+              Reset your password
             </p>
 
             <p
@@ -129,10 +134,11 @@ function Login() {
                 darkMode ? "text-[#918599]" : "text-[#737B87]"
               }`}
             >
-              Log in to your Notes App account
+              Enter your email address and we'll help you reset your password.
             </p>
           </div>
 
+          {/* Card */}
           <div
             className={`rounded-xl border p-4.5 transition-colors duration-300 ${
               darkMode
@@ -144,7 +150,7 @@ function Login() {
               {/* Email */}
               <div>
                 <label
-                  htmlFor="login-email"
+                  htmlFor="forgot-email"
                   className={`block text-[12px] font-medium mb-1.5 ${
                     darkMode ? "text-white" : "text-[#172033]"
                   }`}
@@ -160,7 +166,7 @@ function Login() {
                   />
 
                   <input
-                    id="login-email"
+                    id="forgot-email"
                     type="email"
                     placeholder="you@example.com"
                     value={email}
@@ -171,119 +177,55 @@ function Login() {
                 </div>
               </div>
 
-              {/* Password */}
-              <div>
-                <label
-                  htmlFor="login-password"
-                  className={`block text-[12px] font-medium mb-1.5 ${
-                    darkMode ? "text-white" : "text-[#172033]"
+              {/* Success */}
+              {message && (
+                <div
+                  className={`rounded-lg px-3 py-2 text-[12px] ${
+                    darkMode
+                      ? "bg-green-500/10 text-green-300 border border-green-500/20"
+                      : "bg-green-50 text-green-700 border border-green-200"
                   }`}
                 >
-                  Password
-                </label>
-
-                <div className="relative">
-                  <Lock
-                    size={16}
-                    aria-hidden="true"
-                    className={`absolute left-3 top-1/2 -translate-y-1/2 ${iconClass}`}
-                  />
-
-                  <input
-                    id="login-password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className={`${fieldClass} pl-10 pr-10`}
-                    required
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                    className={`absolute right-3 top-1/2 -translate-y-1/2 ${
-                      darkMode
-                        ? "text-[#C8B9C9] hover:text-white"
-                        : "text-[#7D8795] hover:text-[#7C3AED]"
-                    }`}
-                  >
-                    {showPassword ? (
-                      <EyeOff size={16} aria-hidden="true" />
-                    ) : (
-                      <Eye size={16} aria-hidden="true" />
-                    )}
-                  </button>
+                  {message}
                 </div>
-              </div>
-
-              {/* Remember Me + Forgot Password */}
-              <div className="flex items-center justify-between pt-0.5">
-                <label
-                  htmlFor="remember-me"
-                  className={`flex items-center gap-2 text-[11px] cursor-pointer ${
-                    darkMode ? "text-[#9E91A3]" : "text-[#69717D]"
-                  }`}
-                >
-                  <input
-                    id="remember-me"
-                    type="checkbox"
-                    checked={remember}
-                    onChange={(e) => setRemember(e.target.checked)}
-                    className="w-3.5 h-3.5 accent-[#C837AB]"
-                  />
-
-                  Remember me
-                </label>
-
-                <Link
-                  to="/forgot-password"
-                  className={`text-[11px] font-semibold hover:underline ${
-                    darkMode ? "text-[#D06BC4]" : "text-[#A855F7]"
-                  }`}
-                >
-                  Forgot Password?
-                </Link>
-              </div>
+              )}
 
               {/* Error */}
               {error && (
-                <p className="text-red-400 text-[12px] text-center">
+                <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-red-400 text-[12px]">
                   {error}
-                </p>
+                </div>
               )}
 
-              {/* Sign In */}
+              {/* Submit */}
               <button
                 type="submit"
-                className="w-full h-[42px] rounded-lg bg-gradient-to-r from-[#D21CFF] via-[#913CF5] to-[#477BFF] text-white text-[13px] font-semibold shadow-md shadow-purple-500/20 hover:brightness-110 active:scale-[0.99] transition-all"
+                disabled={loading}
+                className="w-full h-[42px] rounded-lg bg-gradient-to-r from-[#D21CFF] via-[#913CF5] to-[#477BFF] text-white text-[13px] font-semibold shadow-md shadow-purple-500/20 hover:brightness-110 active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Sign In
+                {loading ? "Sending..." : "Send Reset Link"}
               </button>
             </form>
           </div>
 
-          {/* Sign Up */}
-          <p
-            className={`text-[12px] text-center mt-3 ${
-              darkMode ? "text-[#8E8195]" : "text-[#707783]"
-            }`}
-          >
-            Don't have an account?{" "}
+          {/* Back to Login */}
+          <div className="flex justify-center mt-4">
             <Link
-              to="/signup"
-              className="text-[#C837AB] font-semibold hover:underline"
+              to="/login"
+              className={`flex items-center gap-1.5 text-[12px] font-semibold transition-colors ${
+                darkMode
+                  ? "text-[#C837AB] hover:text-[#E05BCA]"
+                  : "text-[#C837AB] hover:text-[#A92B91]"
+              }`}
             >
-              Sign Up
+              <ArrowLeft size={14} aria-hidden="true" />
+              Back to Sign In
             </Link>
-          </p>
+          </div>
         </div>
       </main>
     </div>
   );
 }
 
-export default Login;
+export default ForgotPassword;
