@@ -621,7 +621,7 @@ const handleDeleteSelected = async () => {
             />
 
             <input
-              type="search"
+              type="text"
               value={search}
               onChange={(event) => {
                 const value = event.target.value;
