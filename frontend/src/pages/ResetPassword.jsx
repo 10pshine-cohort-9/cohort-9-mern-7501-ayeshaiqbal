@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import {
   Lock,
@@ -27,6 +27,8 @@ function ResetPassword() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const redirectTimer = useRef(null);
+
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("theme") === "dark";
   });
@@ -34,6 +36,14 @@ function ResetPassword() {
   useEffect(() => {
     localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimer.current) {
+        clearTimeout(redirectTimer.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -69,14 +79,12 @@ function ResetPassword() {
         password,
       });
 
-      setMessage(
-        data.message || "Password reset successful."
-      );
+      setMessage(data.message || "Password reset successful.");
 
       setPassword("");
       setConfirmPassword("");
 
-      setTimeout(() => {
+      redirectTimer.current = setTimeout(() => {
         navigate("/login");
       }, 2000);
     } catch (err) {
@@ -163,7 +171,6 @@ function ResetPassword() {
 
       <main className="flex justify-center px-4 py-7">
         <div className="w-full max-w-[420px]">
-          {/* Heading */}
           <div className="text-center mb-4">
             <h1
               className={`text-[22px] leading-tight font-bold tracking-tight ${
@@ -195,6 +202,7 @@ function ResetPassword() {
               Enter your new password below.
             </p>
           </div>
+
           <div
             className={`rounded-xl border p-4.5 transition-colors duration-300 ${
               darkMode
@@ -206,7 +214,6 @@ function ResetPassword() {
               onSubmit={handleSubmit}
               className="space-y-3"
             >
-
               <div>
                 <label
                   htmlFor="new-password"
@@ -274,6 +281,7 @@ function ResetPassword() {
                   </button>
                 </div>
               </div>
+
               <div>
                 <label
                   htmlFor="confirm-password"
@@ -343,6 +351,7 @@ function ResetPassword() {
                   </button>
                 </div>
               </div>
+
               {message && (
                 <div
                   className={`rounded-lg px-3 py-2 text-[12px] ${
@@ -354,11 +363,13 @@ function ResetPassword() {
                   {message}
                 </div>
               )}
+
               {error && (
                 <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-red-400 text-[12px]">
                   {error}
                 </div>
               )}
+
               <button
                 type="submit"
                 disabled={loading}
@@ -370,6 +381,7 @@ function ResetPassword() {
               </button>
             </form>
           </div>
+
           <div className="flex justify-center mt-4">
             <Link
               to="/login"
