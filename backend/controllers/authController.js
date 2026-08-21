@@ -18,7 +18,7 @@ const signup = (req, res, next) => {
   logger.info({ email }, "Signup attempt");
 
   if (!name || !email || !password) {
-    logger.warn({ email }, "Signup failed - required fields missing");
+    logger.warn("Signup failed - required fields missing");
 
     return res.status(400).json({
       message: "All fields are required",
@@ -37,10 +37,7 @@ const signup = (req, res, next) => {
     }
 
     if (result.length > 0) {
-      logger.warn(
-        { email },
-        "Signup failed - email already exists"
-      );
+      logger.warn("Signup failed - email already exists");
 
       return res.status(400).json({
         message: "Email already exists",
@@ -58,10 +55,7 @@ const signup = (req, res, next) => {
           );
 
           if (err.code === "ER_DUP_ENTRY") {
-            logger.warn(
-              { email },
-              "Signup failed - duplicate email"
-            );
+            logger.warn("Signup failed - duplicate email");
 
             return res.status(400).json({
               message: "Email already exists",
@@ -99,10 +93,7 @@ const login = (req, res, next) => {
   logger.info({ email }, "Login attempt");
 
   if (!email || !password) {
-    logger.warn(
-      { email },
-      "Login failed - missing credentials"
-    );
+    logger.warn("Login failed - missing credentials");
 
     return res.status(400).json({
       message: "Email and password are required",
@@ -121,10 +112,7 @@ const login = (req, res, next) => {
     }
 
     if (result.length === 0) {
-      logger.warn(
-        { email },
-        "Login failed - user not found"
-      );
+      logger.warn("Login failed - invalid credentials");
 
       return res.status(400).json({
         message: "Invalid email or password",
@@ -140,10 +128,7 @@ const login = (req, res, next) => {
       );
 
       if (!isPasswordCorrect) {
-        logger.warn(
-          { email },
-          "Login failed - invalid password"
-        );
+        logger.warn("Login failed - invalid credentials");
 
         return res.status(400).json({
           message: "Invalid email or password",
@@ -153,14 +138,13 @@ const login = (req, res, next) => {
       const token = jwt.sign(
         { id: user.id },
         process.env.JWT_SECRET,
-        { expiresIn: "1d" }
+        {
+          expiresIn: "1d",
+        }
       );
 
       logger.info(
-        {
-          email,
-          userId: user.id,
-        },
+        { userId: user.id },
         "Login successful"
       );
 
@@ -196,15 +180,13 @@ const logout = (req, res) => {
 const forgotPassword = (req, res, next) => {
   const { email } = req.body;
 
-  logger.info(
-    { email },
-    "Forgot password attempt"
-  );
+  const genericMessage =
+    "If an account exists with this email, a password reset link has been sent.";
+
+  logger.info("Forgot password attempt");
 
   if (!email) {
-    logger.warn(
-      "Forgot password failed - email missing"
-    );
+    logger.warn("Forgot password failed - email missing");
 
     return res.status(400).json({
       message: "Email is required",
@@ -222,16 +204,15 @@ const forgotPassword = (req, res, next) => {
       return next(err);
     }
 
-    // Same response is returned whether the email exists or not.
+    // Return the same response whether the email exists or not
+    // to prevent email enumeration.
     if (result.length === 0) {
-      logger.warn(
-        { email },
-        "Forgot password - user not found"
+      logger.info(
+        "Forgot password request completed"
       );
 
       return res.status(200).json({
-        message:
-          "If an account exists with this email, a password reset link has been sent.",
+        message: genericMessage,
       });
     }
 
@@ -256,9 +237,7 @@ const forgotPassword = (req, res, next) => {
       async (err) => {
         if (err) {
           logger.error(
-            {
-              error: err.message,
-            },
+            { error: err.message },
             "Failed to save reset token"
           );
 
@@ -267,35 +246,26 @@ const forgotPassword = (req, res, next) => {
         }
 
         try {
-          // Send email
           await sendResetEmail(
             user.email,
             resetToken
           );
 
           logger.info(
-            {
-              userId: user.id,
-              email: user.email,
-            },
+            { userId: user.id },
             "Password reset email sent successfully"
           );
 
           return res.status(200).json({
-            message:
-              "Password reset link has been sent to your email.",
+            message: genericMessage,
           });
         } catch (error) {
           logger.error(
-            {
-              error: error.message,
-              email: user.email,
-            },
+            { error: error.message },
             "Failed to send password reset email"
           );
 
           error.status = 500;
-
           return next(error);
         }
       }
@@ -319,10 +289,7 @@ const resetPassword = async (req, res, next) => {
   }
 
   try {
-    jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    jwt.verify(token, process.env.JWT_SECRET);
   } catch (error) {
     logger.warn(
       "Password reset failed - invalid or expired token"
@@ -338,9 +305,7 @@ const resetPassword = async (req, res, next) => {
     async (err, result) => {
       if (err) {
         logger.error(
-          {
-            error: err.message,
-          },
+          { error: err.message },
           "Reset password database error"
         );
 
@@ -349,6 +314,10 @@ const resetPassword = async (req, res, next) => {
       }
 
       if (result.length === 0) {
+        logger.warn(
+          "Password reset failed - token not found"
+        );
+
         return res.status(400).json({
           message: "Invalid or expired reset token",
         });
@@ -357,16 +326,19 @@ const resetPassword = async (req, res, next) => {
       const user = result[0];
 
       try {
-        const hashedPassword =
-          await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(
+          password,
+          10
+        );
 
-      
-         updatePassword(user.id, token, hashedPassword, (err, result) =>{
+        updatePassword(
+          user.id,
+          token,
+          hashedPassword,
+          (err, result) => {
             if (err) {
               logger.error(
-                {
-                  error: err.message,
-                },
+                { error: err.message },
                 "Password update failed"
               );
 
@@ -374,30 +346,30 @@ const resetPassword = async (req, res, next) => {
               return next(err);
             }
 
-              if (result.affectedRows === 0) {
-    return res.status(400).json({
-      message: "Invalid or expired reset token",
-    });
-  }
-  
+            // Token must still be valid and unused.
+            if (result.affectedRows === 0) {
+              logger.warn(
+                "Password reset failed - token expired or already used"
+              );
+
+              return res.status(400).json({
+                message: "Invalid or expired reset token",
+              });
+            }
+
             logger.info(
-              {
-                userId: user.id,
-              },
+              { userId: user.id },
               "Password reset successful"
             );
 
             return res.status(200).json({
-              message:
-                "Password reset successful",
+              message: "Password reset successful",
             });
           }
         );
       } catch (error) {
         logger.error(
-          {
-            error: error.message,
-          },
+          { error: error.message },
           "Password hashing failed"
         );
 

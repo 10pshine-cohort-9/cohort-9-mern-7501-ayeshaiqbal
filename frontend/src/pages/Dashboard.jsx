@@ -33,6 +33,7 @@ function Dashboard() {
   const [darkMode, setDarkMode] = useState(
     () => localStorage.getItem("theme") === "dark"
   );
+
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -40,18 +41,23 @@ function Dashboard() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSearchNote, setSelectedSearchNote] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
+
   const [showEditor, setShowEditor] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [saving, setSaving] = useState(false);
+
   const [selectedNotes, setSelectedNotes] = useState([]);
   const [selectMode, setSelectMode] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
   const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem("theme", darkMode ? "dark" : "light");
+    localStorage.setItem(
+      "theme",
+      darkMode ? "dark" : "light"
+    );
   }, [darkMode]);
 
   useEffect(() => {
@@ -75,7 +81,11 @@ function Dashboard() {
             response?.data ||
             [];
 
-        setNotes(Array.isArray(receivedNotes) ? receivedNotes : []);
+        setNotes(
+          Array.isArray(receivedNotes)
+            ? receivedNotes
+            : []
+        );
       } catch (err) {
         if (!isMounted) {
           return;
@@ -138,19 +148,19 @@ function Dashboard() {
       return null;
     }
 
-    if (response?.note) {
+    if (response.note) {
       return response.note;
     }
 
-    if (response?.data?.note) {
+    if (response.data?.note) {
       return response.data.note;
     }
 
-    if (response?.data?.id) {
+    if (response.data?.id) {
       return response.data;
     }
 
-    if (response?.id) {
+    if (response.id) {
       return response;
     }
 
@@ -163,8 +173,9 @@ function Dashboard() {
     const cleanTitle = title.trim();
     const cleanContent = content.trim();
 
-    if (!cleanTitle && !cleanContent) {
-      setError("Please enter a title or content.");
+    // Backend requires both fields.
+    if (!cleanTitle || !cleanContent) {
+      setError("Title and content are required.");
       return;
     }
 
@@ -173,12 +184,16 @@ function Dashboard() {
       setError("");
 
       if (editingNote) {
-        const response = await updateNote(editingNote.id, {
-          title: cleanTitle,
-          content: cleanContent,
-        });
+        const response = await updateNote(
+          editingNote.id,
+          {
+            title: cleanTitle,
+            content: cleanContent,
+          }
+        );
 
-        const apiNote = extractNoteFromResponse(response);
+        const apiNote =
+          extractNoteFromResponse(response);
 
         const updatedNote = {
           ...editingNote,
@@ -187,16 +202,22 @@ function Dashboard() {
           title: cleanTitle,
           content: cleanContent,
           updatedAt:
-            apiNote?.updatedAt || new Date().toISOString(),
+            apiNote?.updatedAt ||
+            new Date().toISOString(),
         };
 
         setNotes((previousNotes) =>
           previousNotes.map((note) =>
-            note.id === editingNote.id ? updatedNote : note
+            note.id === editingNote.id
+              ? updatedNote
+              : note
           )
         );
 
-        if (selectedSearchNote?.id === editingNote.id) {
+        if (
+          selectedSearchNote?.id ===
+          editingNote.id
+        ) {
           setSelectedSearchNote(updatedNote);
         }
 
@@ -209,16 +230,19 @@ function Dashboard() {
         content: cleanContent,
       });
 
-      const apiNote = extractNoteFromResponse(response);
+      const apiNote =
+        extractNoteFromResponse(response);
 
       const newNote = {
         ...(apiNote || {}),
         title: cleanTitle,
         content: cleanContent,
         createdAt:
-          apiNote?.createdAt || new Date().toISOString(),
+          apiNote?.createdAt ||
+          new Date().toISOString(),
         updatedAt:
-          apiNote?.updatedAt || new Date().toISOString(),
+          apiNote?.updatedAt ||
+          new Date().toISOString(),
       };
 
       if (newNote.id) {
@@ -227,14 +251,16 @@ function Dashboard() {
           ...previousNotes,
         ]);
       } else {
-        const refreshedResponse = await getNotes();
+        const refreshedResponse =
+          await getNotes();
 
-        const refreshedNotes = Array.isArray(refreshedResponse)
-          ? refreshedResponse
-          : refreshedResponse?.notes ||
-            refreshedResponse?.data?.notes ||
-            refreshedResponse?.data ||
-            [];
+        const refreshedNotes =
+          Array.isArray(refreshedResponse)
+            ? refreshedResponse
+            : refreshedResponse?.notes ||
+              refreshedResponse?.data?.notes ||
+              refreshedResponse?.data ||
+              [];
 
         setNotes(
           Array.isArray(refreshedNotes)
@@ -261,11 +287,15 @@ function Dashboard() {
       await deleteNote(id);
 
       setNotes((previousNotes) =>
-        previousNotes.filter((note) => note.id !== id)
+        previousNotes.filter(
+          (note) => note.id !== id
+        )
       );
 
       setSelectedNotes((previousSelected) =>
-        previousSelected.filter((noteId) => noteId !== id)
+        previousSelected.filter(
+          (noteId) => noteId !== id
+        )
       );
 
       if (selectedSearchNote?.id === id) {
@@ -286,7 +316,9 @@ function Dashboard() {
   const toggleSelectNote = (id) => {
     setSelectedNotes((previousSelected) =>
       previousSelected.includes(id)
-        ? previousSelected.filter((noteId) => noteId !== id)
+        ? previousSelected.filter(
+            (noteId) => noteId !== id
+          )
         : [...previousSelected, id]
     );
   };
@@ -321,7 +353,9 @@ function Dashboard() {
     }
   };
 
-  const normalizedSearch = search.trim().toLowerCase();
+  const normalizedSearch = search
+    .trim()
+    .toLowerCase();
 
   const suggestions = useMemo(() => {
     if (!normalizedSearch) {
@@ -361,7 +395,8 @@ function Dashboard() {
   const filteredNotes = useMemo(() => {
     if (selectedSearchNote) {
       return notes.filter(
-        (note) => note.id === selectedSearchNote.id
+        (note) =>
+          note.id === selectedSearchNote.id
       );
     }
 
@@ -370,15 +405,22 @@ function Dashboard() {
     }
 
     return notes.filter((note) => {
-      const noteTitle = (note.title || "").toLowerCase();
-      const noteContent = (note.content || "").toLowerCase();
+      const noteTitle = (note.title || "")
+        .toLowerCase();
+
+      const noteContent = (note.content || "")
+        .toLowerCase();
 
       return (
         noteTitle.includes(normalizedSearch) ||
         noteContent.includes(normalizedSearch)
       );
     });
-  }, [notes, normalizedSearch, selectedSearchNote]);
+  }, [
+    notes,
+    normalizedSearch,
+    selectedSearchNote,
+  ]);
 
   const formatDate = (date) => {
     if (!date) {
@@ -391,11 +433,14 @@ function Dashboard() {
       return "";
     }
 
-    return parsedDate.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    return parsedDate.toLocaleDateString(
+      "en-US",
+      {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }
+    );
   };
 
   const getPreview = (noteContent) => {
@@ -415,13 +460,15 @@ function Dashboard() {
   return (
     <div
       className={`min-h-screen transition-colors duration-300 ${
-        darkMode ? "bg-[#08060C]" : "bg-[#F8F9FB]"
+        darkMode
+          ? "bg-[#08060C]"
+          : "bg-[#F8F9FB]"
       }`}
     >
       <header
-        className={`sticky top-0 z-30 h-14.5 border-b backdrop-blur-md ${
+        className={`sticky top-0 z-30 h-14 border-b backdrop-blur-md ${
           darkMode
-            ? "bg-[#09070E]/95 border-white/8"
+            ? "bg-[#09070E]/95 border-white/[0.08]"
             : "bg-white/95 border-gray-200"
         }`}
       >
@@ -432,13 +479,17 @@ function Dashboard() {
               strokeWidth={2}
               aria-hidden="true"
               className={
-                darkMode ? "text-white" : "text-[#111827]"
+                darkMode
+                  ? "text-white"
+                  : "text-[#111827]"
               }
             />
 
             <span
               className={`text-xl font-bold tracking-tight ${
-                darkMode ? "text-white" : "text-[#111827]"
+                darkMode
+                  ? "text-white"
+                  : "text-[#111827]"
               }`}
             >
               Notes App
@@ -449,12 +500,14 @@ function Dashboard() {
             <button
               type="button"
               onClick={() =>
-                setDarkMode((previous) => !previous)
+                setDarkMode(
+                  (previous) => !previous
+                )
               }
               aria-label="Toggle theme"
               className={`w-9 h-9 rounded-lg border flex items-center justify-center transition-all ${
                 darkMode
-                  ? "border-white/10 bg-white/4 text-yellow-300 hover:bg-white/8"
+                  ? "border-white/[0.1] bg-white/[0.04] text-yellow-300 hover:bg-white/[0.08]"
                   : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
@@ -467,7 +520,9 @@ function Dashboard() {
 
             <button
               type="button"
-              onClick={() => setShowProfile(true)}
+              onClick={() =>
+                setShowProfile(true)
+              }
               className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-semibold ${
                 darkMode
                   ? "bg-[#24152A] text-white hover:bg-[#321C3A]"
@@ -475,7 +530,9 @@ function Dashboard() {
               }`}
               aria-label="Open profile"
             >
-              {user?.name?.charAt(0)?.toUpperCase() || "U"}
+              {user?.name
+                ?.charAt(0)
+                ?.toUpperCase() || "U"}
             </button>
           </div>
         </div>
@@ -486,7 +543,9 @@ function Dashboard() {
           <div>
             <p
               className={`text-sm font-medium mb-1 ${
-                darkMode ? "text-[#C837AB]" : "text-[#8B5CF6]"
+                darkMode
+                  ? "text-[#C837AB]"
+                  : "text-[#8B5CF6]"
               }`}
             >
               Your workspace
@@ -494,19 +553,24 @@ function Dashboard() {
 
             <h1
               className={`text-3xl md:text-4xl font-bold tracking-tight ${
-                darkMode ? "text-white" : "text-[#111827]"
+                darkMode
+                  ? "text-white"
+                  : "text-[#111827]"
               }`}
             >
-              Good to see you, {user?.name || "User"}
+              Good to see you,{" "}
+              {user?.name || "User"}
             </h1>
 
             <p
               className={`mt-2 text-sm ${
-                darkMode ? "text-[#918599]" : "text-[#737B87]"
+                darkMode
+                  ? "text-[#918599]"
+                  : "text-[#737B87]"
               }`}
             >
-              Capture ideas, organize thoughts, and keep
-              everything in one place.
+              Capture ideas, organize thoughts,
+              and keep everything in one place.
             </p>
           </div>
 
@@ -544,7 +608,9 @@ function Dashboard() {
 
                 setSearch(value);
                 setSelectedSearchNote(null);
-                setShowSuggestions(Boolean(value.trim()));
+                setShowSuggestions(
+                  Boolean(value.trim())
+                );
               }}
               onFocus={() => {
                 if (search.trim()) {
@@ -587,52 +653,59 @@ function Dashboard() {
                 >
                   {suggestions.length > 0 ? (
                     <div className="py-1">
-                      {suggestions.map((note) => (
-                        <button
-                          key={note.id}
-                          type="button"
-                          onClick={() =>
-                            handleSuggestionClick(note)
-                          }
-                          className={`w-full px-4 py-3 text-left flex items-start gap-3 transition-colors ${
-                            darkMode
-                              ? "hover:bg-white/5"
-                              : "hover:bg-gray-50"
-                          }`}
-                        >
-                          <div
-                            className={`mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                      {suggestions.map(
+                        (note) => (
+                          <button
+                            key={note.id}
+                            type="button"
+                            onClick={() =>
+                              handleSuggestionClick(
+                                note
+                              )
+                            }
+                            className={`w-full px-4 py-3 text-left flex items-start gap-3 transition-colors ${
                               darkMode
-                                ? "bg-[#24152A] text-[#C837AB]"
-                                : "bg-gray-100 text-gray-700"
+                                ? "hover:bg-white/[0.05]"
+                                : "hover:bg-gray-50"
                             }`}
                           >
-                            <BookOpen size={15} />
-                          </div>
-
-                          <div className="min-w-0">
-                            <p
-                              className={`text-sm font-semibold truncate ${
+                            <div
+                              className={`mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
                                 darkMode
-                                  ? "text-white"
-                                  : "text-[#111827]"
+                                  ? "bg-[#24152A] text-[#C837AB]"
+                                  : "bg-gray-100 text-gray-700"
                               }`}
                             >
-                              {note.title || "Untitled Note"}
-                            </p>
+                              <BookOpen size={15} />
+                            </div>
 
-                            <p
-                              className={`text-xs mt-0.5 truncate ${
-                                darkMode
-                                  ? "text-[#918599]"
-                                  : "text-[#8B93A0]"
-                              }`}
-                            >
-                              {getPreview(note.content)}
-                            </p>
-                          </div>
-                        </button>
-                      ))}
+                            <div className="min-w-0">
+                              <p
+                                className={`text-sm font-semibold truncate ${
+                                  darkMode
+                                    ? "text-white"
+                                    : "text-[#111827]"
+                                }`}
+                              >
+                                {note.title ||
+                                  "Untitled Note"}
+                              </p>
+
+                              <p
+                                className={`text-xs mt-0.5 truncate ${
+                                  darkMode
+                                    ? "text-[#918599]"
+                                    : "text-[#8B93A0]"
+                                }`}
+                              >
+                                {getPreview(
+                                  note.content
+                                )}
+                              </p>
+                            </div>
+                          </button>
+                        )
+                      )}
                     </div>
                   ) : (
                     <div
@@ -652,7 +725,9 @@ function Dashboard() {
           <button
             type="button"
             onClick={() => {
-              setSelectMode((previous) => !previous);
+              setSelectMode(
+                (previous) => !previous
+              );
 
               if (selectMode) {
                 setSelectedNotes([]);
@@ -665,24 +740,29 @@ function Dashboard() {
             }`}
           >
             <CheckSquare size={17} />
-            {selectMode ? "Cancel Select" : "Select"}
+            {selectMode
+              ? "Cancel Select"
+              : "Select"}
           </button>
 
-          {selectMode && selectedNotes.length > 0 && (
-            <button
-              type="button"
-              onClick={handleDeleteSelected}
-              className="h-11 px-4 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-all flex items-center justify-center gap-2"
-            >
-              <Trash2 size={17} />
-              Delete ({selectedNotes.length})
-            </button>
-          )}
+          {selectMode &&
+            selectedNotes.length > 0 && (
+              <button
+                type="button"
+                onClick={handleDeleteSelected}
+                className="h-11 px-4 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-all flex items-center justify-center gap-2"
+              >
+                <Trash2 size={17} />
+                Delete ({selectedNotes.length})
+              </button>
+            )}
         </div>
 
         <div
           className={`flex items-center gap-1 border-b mb-6 ${
-            darkMode ? "border-white/8" : "border-gray-200"
+            darkMode
+              ? "border-white/[0.08]"
+              : "border-gray-200"
           }`}
         >
           <button
@@ -703,7 +783,9 @@ function Dashboard() {
 
           <button
             type="button"
-            onClick={() => setActiveTab("folders")}
+            onClick={() =>
+              setActiveTab("folders")
+            }
             className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all ${
               activeTab === "folders"
                 ? darkMode
@@ -754,7 +836,9 @@ function Dashboard() {
 
             <h2
               className={`font-semibold ${
-                darkMode ? "text-white" : "text-[#111827]"
+                darkMode
+                  ? "text-white"
+                  : "text-[#111827]"
               }`}
             >
               Folders coming soon
@@ -767,8 +851,8 @@ function Dashboard() {
                   : "text-[#737B87]"
               }`}
             >
-              Folder organization will be added in a future
-              update.
+              Folder organization will be added
+              in a future update.
             </p>
           </div>
         ) : loading ? (
@@ -777,7 +861,9 @@ function Dashboard() {
               <div
                 key={item}
                 className={`h-48 rounded-2xl animate-pulse ${
-                  darkMode ? "bg-[#120D17]" : "bg-gray-200"
+                  darkMode
+                    ? "bg-[#120D17]"
+                    : "bg-gray-200"
                 }`}
               />
             ))}
@@ -792,23 +878,31 @@ function Dashboard() {
           >
             <div
               className={`w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center ${
-                darkMode ? "bg-[#24152A]" : "bg-gray-100"
+                darkMode
+                  ? "bg-[#24152A]"
+                  : "bg-gray-100"
               }`}
             >
               <BookOpen
                 size={25}
                 className={
-                  darkMode ? "text-[#C837AB]" : "text-gray-700"
+                  darkMode
+                    ? "text-[#C837AB]"
+                    : "text-gray-700"
                 }
               />
             </div>
 
             <h2
               className={`text-lg font-semibold ${
-                darkMode ? "text-white" : "text-[#111827]"
+                darkMode
+                  ? "text-white"
+                  : "text-[#111827]"
               }`}
             >
-              {search ? "No notes found" : "Your notebook is empty"}
+              {search
+                ? "No notes found"
+                : "Your notebook is empty"}
             </h2>
 
             <p
@@ -827,10 +921,10 @@ function Dashboard() {
               <button
                 type="button"
                 onClick={openCreateEditor}
-                className={`px-5 py-2.5 rounded-lg text-white text-sm font-semibold transition-all ${
+                className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
                   darkMode
                     ? "bg-white text-[#111827] hover:bg-gray-100"
-                    : "bg-[#111827] hover:bg-gray-800"
+                    : "bg-[#111827] text-white hover:bg-gray-800"
                 }`}
               >
                 Create Your First Note
@@ -840,7 +934,8 @@ function Dashboard() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredNotes.map((note) => {
-              const isSelected = selectedNotes.includes(note.id);
+              const isSelected =
+                selectedNotes.includes(note.id);
 
               return (
                 <article
@@ -856,7 +951,11 @@ function Dashboard() {
                   {selectMode && (
                     <button
                       type="button"
-                      onClick={() => toggleSelectNote(note.id)}
+                      onClick={() =>
+                        toggleSelectNote(
+                          note.id
+                        )
+                      }
                       aria-label={`Select ${
                         note.title || "note"
                       }`}
@@ -868,7 +967,9 @@ function Dashboard() {
                           : "border-gray-300"
                       }`}
                     >
-                      {isSelected && <CheckSquare size={13} />}
+                      {isSelected && (
+                        <CheckSquare size={13} />
+                      )}
                     </button>
                   )}
 
@@ -885,7 +986,8 @@ function Dashboard() {
                             : "text-[#111827]"
                         }`}
                       >
-                        {note.title || "Untitled Note"}
+                        {note.title ||
+                          "Untitled Note"}
                       </h3>
 
                       <p
@@ -896,7 +998,8 @@ function Dashboard() {
                         }`}
                       >
                         {formatDate(
-                          note.updatedAt || note.createdAt
+                          note.updatedAt ||
+                            note.createdAt
                         )}
                       </p>
                     </div>
@@ -917,11 +1020,13 @@ function Dashboard() {
                           }`}
                           className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                             darkMode
-                              ? "text-[#918599] hover:bg-white/5"
+                              ? "text-[#918599] hover:bg-white/[0.05]"
                               : "text-[#737B87] hover:bg-gray-100"
                           }`}
                         >
-                          <MoreVertical size={17} />
+                          <MoreVertical
+                            size={17}
+                          />
                         </button>
 
                         {openMenu === note.id && (
@@ -934,10 +1039,14 @@ function Dashboard() {
                           >
                             <button
                               type="button"
-                              onClick={() => openEditEditor(note)}
+                              onClick={() =>
+                                openEditEditor(
+                                  note
+                                )
+                              }
                               className={`w-full px-3 py-2 rounded-lg text-left text-xs flex items-center gap-2 ${
                                 darkMode
-                                  ? "text-white hover:bg-white/5"
+                                  ? "text-white hover:bg-white/[0.05]"
                                   : "text-[#374151] hover:bg-gray-100"
                               }`}
                             >
@@ -948,7 +1057,9 @@ function Dashboard() {
                             <button
                               type="button"
                               onClick={() =>
-                                handleDeleteNote(note.id)
+                                handleDeleteNote(
+                                  note.id
+                                )
                               }
                               className="w-full px-3 py-2 rounded-lg text-left text-xs text-red-500 hover:bg-red-500/10 flex items-center gap-2"
                             >
@@ -962,7 +1073,7 @@ function Dashboard() {
                   </div>
 
                   <div
-                    className={`mt-5 text-sm leading-6 min-h-18 ${
+                    className={`mt-5 text-sm leading-6 min-h-[72px] ${
                       darkMode
                         ? "text-[#B9AEBB]"
                         : "text-[#5F6875]"
@@ -974,7 +1085,7 @@ function Dashboard() {
                   <div
                     className={`mt-5 pt-4 border-t text-[11px] ${
                       darkMode
-                        ? "border-white/6 text-[#75677A]"
+                        ? "border-white/[0.06] text-[#75677A]"
                         : "border-gray-100 text-[#9AA1AC]"
                     }`}
                   >
@@ -999,17 +1110,21 @@ function Dashboard() {
             <div
               className={`px-5 py-4 border-b flex items-center justify-between ${
                 darkMode
-                  ? "border-white/8"
+                  ? "border-white/[0.08]"
                   : "border-gray-200"
               }`}
             >
               <div>
                 <h2
                   className={`text-lg font-semibold ${
-                    darkMode ? "text-white" : "text-[#111827]"
+                    darkMode
+                      ? "text-white"
+                      : "text-[#111827]"
                   }`}
                 >
-                  {editingNote ? "Edit Note" : "Create Note"}
+                  {editingNote
+                    ? "Edit Note"
+                    : "Create Note"}
                 </h2>
 
                 <p
@@ -1030,7 +1145,7 @@ function Dashboard() {
                 aria-label="Close note editor"
                 className={`w-9 h-9 rounded-lg flex items-center justify-center ${
                   darkMode
-                    ? "text-[#918599] hover:bg-white/5"
+                    ? "text-[#918599] hover:bg-white/[0.05]"
                     : "text-[#737B87] hover:bg-gray-100"
                 }`}
               >
@@ -1038,11 +1153,16 @@ function Dashboard() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveNote} className="p-5">
+            <form
+              onSubmit={handleSaveNote}
+              className="p-5"
+            >
               <input
                 type="text"
                 value={title}
-                onChange={(event) => setTitle(event.target.value)}
+                onChange={(event) =>
+                  setTitle(event.target.value)
+                }
                 placeholder="Note title"
                 aria-label="Note title"
                 disabled={saving}
@@ -1055,7 +1175,9 @@ function Dashboard() {
 
               <textarea
                 value={content}
-                onChange={(event) => setContent(event.target.value)}
+                onChange={(event) =>
+                  setContent(event.target.value)
+                }
                 placeholder="Start writing your note..."
                 rows={9}
                 aria-label="Note content"
@@ -1074,7 +1196,7 @@ function Dashboard() {
                   disabled={saving}
                   className={`px-4 h-10 rounded-lg text-sm font-medium ${
                     darkMode
-                      ? "text-[#B9AEBB] hover:bg-white/5"
+                      ? "text-[#B9AEBB] hover:bg-white/[0.05]"
                       : "text-[#5F6875] hover:bg-gray-100"
                   }`}
                 >
@@ -1091,6 +1213,7 @@ function Dashboard() {
                   }`}
                 >
                   <Save size={16} />
+
                   {saving
                     ? "Saving..."
                     : editingNote
@@ -1115,7 +1238,9 @@ function Dashboard() {
             <div className="flex justify-between items-center mb-6">
               <h2
                 className={`text-lg font-semibold ${
-                  darkMode ? "text-white" : "text-[#111827]"
+                  darkMode
+                    ? "text-white"
+                    : "text-[#111827]"
                 }`}
               >
                 Your Profile
@@ -1123,11 +1248,13 @@ function Dashboard() {
 
               <button
                 type="button"
-                onClick={() => setShowProfile(false)}
+                onClick={() =>
+                  setShowProfile(false)
+                }
                 aria-label="Close profile"
                 className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                   darkMode
-                    ? "text-[#918599] hover:bg-white/5"
+                    ? "text-[#918599] hover:bg-white/[0.05]"
                     : "text-[#737B87] hover:bg-gray-100"
                 }`}
               >
@@ -1143,12 +1270,16 @@ function Dashboard() {
                     : "bg-[#111827] text-white"
                 }`}
               >
-                {user?.name?.charAt(0)?.toUpperCase() || "U"}
+                {user?.name
+                  ?.charAt(0)
+                  ?.toUpperCase() || "U"}
               </div>
 
               <h3
                 className={`mt-4 font-semibold ${
-                  darkMode ? "text-white" : "text-[#111827]"
+                  darkMode
+                    ? "text-white"
+                    : "text-[#111827]"
                 }`}
               >
                 {user?.name || "User"}
@@ -1161,14 +1292,17 @@ function Dashboard() {
                     : "text-[#737B87]"
                 }`}
               >
-                {user?.email || "No email available"}
+                {user?.email ||
+                  "No email available"}
               </p>
             </div>
 
             <div className="mt-6 space-y-2">
               <div
                 className={`rounded-xl p-3 flex items-center gap-3 ${
-                  darkMode ? "bg-white/4" : "bg-[#F8F9FB]"
+                  darkMode
+                    ? "bg-white/[0.04]"
+                    : "bg-[#F8F9FB]"
                 }`}
               >
                 <User
@@ -1193,7 +1327,9 @@ function Dashboard() {
 
               <div
                 className={`rounded-xl p-3 flex items-center gap-3 ${
-                  darkMode ? "bg-white/4" : "bg-[#F8F9FB]"
+                  darkMode
+                    ? "bg-white/[0.04]"
+                    : "bg-[#F8F9FB]"
                 }`}
               >
                 <Mail
@@ -1212,7 +1348,8 @@ function Dashboard() {
                       : "text-[#4B5563]"
                   }`}
                 >
-                  {user?.email || "No email available"}
+                  {user?.email ||
+                    "No email available"}
                 </span>
               </div>
             </div>

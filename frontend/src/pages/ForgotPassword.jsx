@@ -27,15 +27,10 @@ function ForgotPassword() {
     try {
       const data = await forgotPassword({ email });
 
-      setMessage(data.message || "Password reset link generated.");
-
-      // Development/testing ke liye token show kar rahe hain.
-      // Production mein ye token email ke through bhejna chahiye.
-      if (data.resetToken) {
-        setMessage(
-          `${data.message || "Password reset link generated."} Reset token generated successfully.`
-        );
-      }
+      setMessage(
+        data.message ||
+          "If an account exists with this email, a password reset link has been sent."
+      );
 
       setEmail("");
     } catch (err) {
@@ -55,7 +50,9 @@ function ForgotPassword() {
     ? `${inputClass} bg-[#2F1D32] border-[#593750] text-white placeholder:text-[#9E899F] focus:border-[#C837AB]`
     : `${inputClass} bg-[#F3F4F6] border-[#D9DDE3] text-[#111827] placeholder:text-[#8B93A0] focus:border-[#A855F7]`;
 
-  const iconClass = darkMode ? "text-[#D2C4D3]" : "text-[#7D8795]";
+  const iconClass = darkMode
+    ? "text-[#D2C4D3]"
+    : "text-[#7D8795]";
 
   return (
     <div
@@ -63,7 +60,6 @@ function ForgotPassword() {
         darkMode ? "bg-[#08060C]" : "bg-white"
       }`}
     >
-      {/* Header */}
       <header
         className={`h-[58px] border-b transition-colors duration-300 ${
           darkMode
@@ -77,12 +73,18 @@ function ForgotPassword() {
               size={25}
               strokeWidth={2}
               aria-hidden="true"
-              className={darkMode ? "text-white" : "text-[#111827]"}
+              className={
+                darkMode
+                  ? "text-white"
+                  : "text-[#111827]"
+              }
             />
 
             <span
               className={`text-[20px] font-bold tracking-tight ${
-                darkMode ? "text-white" : "text-[#111827]"
+                darkMode
+                  ? "text-white"
+                  : "text-[#111827]"
               }`}
             >
               Notes App
@@ -108,14 +110,14 @@ function ForgotPassword() {
         </div>
       </header>
 
-      {/* Main */}
       <main className="flex justify-center px-4 py-7">
         <div className="w-full max-w-[420px]">
-          {/* Heading */}
           <div className="text-center mb-4">
             <h1
               className={`text-[22px] leading-tight font-bold tracking-tight ${
-                darkMode ? "text-white" : "text-[#111827]"
+                darkMode
+                  ? "text-white"
+                  : "text-[#111827]"
               }`}
             >
               Forgot Password?
@@ -123,7 +125,9 @@ function ForgotPassword() {
 
             <p
               className={`mt-1 text-[14px] font-medium ${
-                darkMode ? "text-white" : "text-[#1F2937]"
+                darkMode
+                  ? "text-white"
+                  : "text-[#1F2937]"
               }`}
             >
               Reset your password
@@ -131,14 +135,15 @@ function ForgotPassword() {
 
             <p
               className={`mt-1 text-[12px] ${
-                darkMode ? "text-[#918599]" : "text-[#737B87]"
+                darkMode
+                  ? "text-[#918599]"
+                  : "text-[#737B87]"
               }`}
             >
               Enter your email address and we'll help you reset your password.
             </p>
           </div>
 
-          {/* Card */}
           <div
             className={`rounded-xl border p-4.5 transition-colors duration-300 ${
               darkMode
@@ -147,12 +152,13 @@ function ForgotPassword() {
             }`}
           >
             <form onSubmit={handleSubmit} className="space-y-3">
-              {/* Email */}
               <div>
                 <label
                   htmlFor="forgot-email"
                   className={`block text-[12px] font-medium mb-1.5 ${
-                    darkMode ? "text-white" : "text-[#172033]"
+                    darkMode
+                      ? "text-white"
+                      : "text-[#172033]"
                   }`}
                 >
                   Email Address
@@ -177,7 +183,6 @@ function ForgotPassword() {
                 </div>
               </div>
 
-              {/* Success */}
               {message && (
                 <div
                   className={`rounded-lg px-3 py-2 text-[12px] ${
@@ -190,14 +195,12 @@ function ForgotPassword() {
                 </div>
               )}
 
-              {/* Error */}
               {error && (
                 <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-red-400 text-[12px]">
                   {error}
                 </div>
               )}
 
-              {/* Submit */}
               <button
                 type="submit"
                 disabled={loading}
@@ -208,7 +211,6 @@ function ForgotPassword() {
             </form>
           </div>
 
-          {/* Back to Login */}
           <div className="flex justify-center mt-4">
             <Link
               to="/login"

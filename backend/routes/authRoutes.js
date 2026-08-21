@@ -1,4 +1,5 @@
 const express = require("express");
+
 const router = express.Router();
 
 const {
@@ -14,11 +15,9 @@ const verifyToken = require("../middleware/authMiddleware");
 router.post("/signup", signup);
 router.post("/login", login);
 router.post("/logout", verifyToken, logout);
-
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 
-// Protected route (JWT test)
 router.get("/profile", verifyToken, (req, res) => {
   res.json({
     message: "Protected route accessed",

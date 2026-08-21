@@ -26,9 +26,10 @@ const saveResetToken = (userId, token, expiry, callback) => {
 
 const findUserByResetToken = (token, callback) => {
   const query = `
-    SELECT * FROM users
+    SELECT id, name, email
+    FROM users
     WHERE reset_token = ?
-    AND reset_token_expiry > NOW()
+      AND reset_token_expiry > NOW()
   `;
 
   connection.query(query, [token], callback);
