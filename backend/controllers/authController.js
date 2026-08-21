@@ -42,6 +42,7 @@ const signup = (req, res, next) => {
         }
 
         logger.info({ email }, "User signup successful");
+
         return res
           .status(201)
           .json({ message: "User registered successfully" });
@@ -61,7 +62,9 @@ const login = (req, res, next) => {
 
   if (!email || !password) {
     logger.warn({ email }, "Login failed - missing credentials");
-    return res.status(400).json({ message: "Email and password are required" });
+    return res
+      .status(400)
+      .json({ message: "Email and password are required" });
   }
 
   findUserByEmail(email, async (err, result) => {
@@ -78,18 +81,29 @@ const login = (req, res, next) => {
 
     try {
       const user = result[0];
-      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+      const isPasswordCorrect = await bcrypt.compare(
+        password,
+        user.password
+      );
 
       if (!isPasswordCorrect) {
         logger.warn({ email }, "Login failed - invalid password");
-        return res.status(400).json({ message: "Invalid email or password" });
+        return res
+          .status(400)
+          .json({ message: "Invalid email or password" });
       }
 
-      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-        expiresIn: "1d",
-      });
+      const token = jwt.sign(
+        { id: user.id },
+        process.env.JWT_SECRET,
+        { expiresIn: "1d" }
+      );
 
-      logger.info({ email, userId: user.id }, "Login successful");
+      logger.info(
+        { email, userId: user.id },
+        "Login successful"
+      );
 
       return res.status(200).json({
         message: "Login successful",
@@ -113,4 +127,9 @@ const logout = (req, res) => {
   return res.status(200).json({ message: "Logout successful" });
 };
 
-module.exports = { signup, login, logout };
+module.exports = {
+  signup,
+  login,
+  logout,
+};
+

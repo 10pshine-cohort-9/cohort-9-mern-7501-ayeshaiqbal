@@ -1,7 +1,11 @@
 const { expect } = require("chai");
 const sinon = require("sinon");
 
-const { signup, login, logout } = require("../controllers/authController");
+const {
+  signup,
+  login,
+  logout,
+} = require("../controllers/authController");
 
 describe("Auth Controller", () => {
   it("should return 400 if required fields are missing", () => {
@@ -69,3 +73,4 @@ describe("Auth Controller", () => {
     ).to.equal(true);
   });
 });
+

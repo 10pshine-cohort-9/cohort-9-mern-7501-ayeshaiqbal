@@ -23,12 +23,12 @@ const addNote = (req, res, next) => {
   createNote(userId, title, content, (err, result) => {
     if (err) {
       logger.error(
-  { error: err.message, userId },
-  "Create note database error",
-);
+        { error: err.message, userId },
+        "Create note database error",
+      );
 
-err.status = 500;
-return next(err);
+      err.status = 500;
+      return next(err);
     }
 
     logger.info({ userId }, "Note created successfully");
@@ -46,13 +46,13 @@ const getNotes = (req, res, next) => {
 
   getNotesByUserId(userId, (err, result) => {
     if (err) {
- logger.error(
-  { error: err.message, userId },
-  "Fetch notes database error",
-);
+      logger.error(
+        { error: err.message, userId },
+        "Fetch notes database error",
+      );
 
-err.status = 500;
-return next(err);
+      err.status = 500;
+      return next(err);
     }
 
     logger.info(
@@ -84,13 +84,13 @@ const updateUserNote = (req, res, next) => {
 
   updateNote(noteId, userId, title, content, (err, result) => {
     if (err) {
-     logger.error(
-  { error: err.message, userId, noteId },
-  "Update note database error",
-);
+      logger.error(
+        { error: err.message, userId, noteId },
+        "Update note database error",
+      );
 
-err.status = 500;
-return next(err);
+      err.status = 500;
+      return next(err);
     }
 
     if (result.affectedRows === 0) {
@@ -123,13 +123,13 @@ const deleteUserNote = (req, res, next) => {
 
   deleteNote(noteId, userId, (err, result) => {
     if (err) {
-  logger.error(
-  { error: err.message, userId, noteId },
-  "Delete note database error",
-);
+      logger.error(
+        { error: err.message, userId, noteId },
+        "Delete note database error",
+      );
 
-err.status = 500;
-return next(err);
+      err.status = 500;
+      return next(err);
     }
 
     if (result.affectedRows === 0) {
@@ -160,3 +160,4 @@ module.exports = {
   updateUserNote,
   deleteUserNote,
 };
+
