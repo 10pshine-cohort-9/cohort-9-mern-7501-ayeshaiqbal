@@ -354,6 +354,8 @@ function ResetPassword() {
 
               {message && (
                 <div
+                  role="status"
+                  aria-live="polite"
                   className={`rounded-lg px-3 py-2 text-[12px] ${
                     darkMode
                       ? "bg-green-500/10 text-green-300 border border-green-500/20"
@@ -365,7 +367,10 @@ function ResetPassword() {
               )}
 
               {error && (
-                <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-red-400 text-[12px]">
+                <div
+                  role="alert"
+                  className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-red-400 text-[12px]"
+                >
                   {error}
                 </div>
               )}

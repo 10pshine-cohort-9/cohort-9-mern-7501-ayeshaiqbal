@@ -322,36 +322,56 @@ function Dashboard() {
         : [...previousSelected, id]
     );
   };
+  
+const handleDeleteSelected = async () => {
+  if (selectedNotes.length === 0) {
+    return;
+  }
 
-  const handleDeleteSelected = async () => {
-    if (selectedNotes.length === 0) {
+  const notesToDelete = [...selectedNotes];
+
+  try {
+    setError("");
+
+    const results = await Promise.allSettled(
+      notesToDelete.map((id) => deleteNote(id))
+    );
+
+    const deletedIds = notesToDelete.filter(
+      (id, index) => results[index].status === "fulfilled"
+    );
+
+    const failedCount =
+      results.length - deletedIds.length;
+
+    setNotes((previousNotes) =>
+      previousNotes.filter(
+        (note) => !deletedIds.includes(note.id)
+      )
+    );
+
+    setSelectedNotes((previousSelected) =>
+      previousSelected.filter(
+        (id) => !deletedIds.includes(id)
+      )
+    );
+
+    if (failedCount > 0) {
+      setError(
+        `Unable to delete ${failedCount} of ${results.length} notes.`
+      );
       return;
     }
 
-    const notesToDelete = [...selectedNotes];
-
-    try {
-      setError("");
-
-      await Promise.all(
-        notesToDelete.map((id) => deleteNote(id))
-      );
-
-      setNotes((previousNotes) =>
-        previousNotes.filter(
-          (note) => !notesToDelete.includes(note.id)
-        )
-      );
-
-      setSelectedNotes([]);
-      setSelectMode(false);
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Unable to delete selected notes."
-      );
-    }
-  };
+    setSelectMode(false);
+  } catch (err) {
+    setError(
+      err.response?.data?.message ||
+        "Unable to delete selected notes."
+    );
+  }
+};
+ 
 
   const normalizedSearch = search
     .trim()
