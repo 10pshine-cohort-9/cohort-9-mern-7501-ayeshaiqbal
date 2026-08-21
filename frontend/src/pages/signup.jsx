@@ -58,7 +58,6 @@ function Signup() {
               Notes App
             </span>
           </Link>
-
           <button
             type="button"
             onClick={() => setDarkMode((prev) => !prev)}
@@ -88,7 +87,7 @@ function Signup() {
             </p>
           </div>
 
-          <div className={`rounded-xl border p-4.5 ${darkMode ? "bg-[#0E0A14] border-[#251A2C] shadow-xl shadow-black/30" : "bg-white border-gray-200 shadow-lg shadow-gray-200/50"}`}>
+          <div className={`rounded-xl border p-4 ${darkMode ? "bg-[#0E0A14] border-[#251A2C] shadow-xl shadow-black/30" : "bg-white border-gray-200 shadow-lg shadow-gray-200/50"}`}>
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
                 <label htmlFor="signup-name" className={`block text-[12px] font-medium mb-1.5 ${darkMode ? "text-white" : "text-[#172033]"}`}>
@@ -177,4 +176,3 @@ function Signup() {
 }
 
 export default Signup;
-
