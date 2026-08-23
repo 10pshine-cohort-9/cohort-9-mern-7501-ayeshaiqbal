@@ -24,7 +24,9 @@ function ResetPassword() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(
+    token ? "" : "Invalid or missing reset token."
+  );
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -37,13 +39,6 @@ function ResetPassword() {
   useEffect(() => {
     localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
-
-  // Show an error immediately when the reset token is missing.
-  useEffect(() => {
-    if (!token) {
-      setError("Invalid or missing reset token.");
-    }
-  }, [token]);
 
   useEffect(() => {
     return () => {
