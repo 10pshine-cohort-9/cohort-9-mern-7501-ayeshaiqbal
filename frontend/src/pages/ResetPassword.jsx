@@ -26,6 +26,7 @@ function ResetPassword() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const redirectTimer = useRef(null);
 
@@ -36,6 +37,13 @@ function ResetPassword() {
   useEffect(() => {
     localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
+
+  // Show an error immediately when the reset token is missing.
+  useEffect(() => {
+    if (!token) {
+      setError("Invalid or missing reset token.");
+    }
+  }, [token]);
 
   useEffect(() => {
     return () => {
@@ -80,6 +88,7 @@ function ResetPassword() {
       });
 
       setMessage(data.message || "Password reset successful.");
+      setSuccess(true);
 
       setPassword("");
       setConfirmPassword("");
@@ -245,8 +254,10 @@ function ResetPassword() {
                     onChange={(e) =>
                       setPassword(e.target.value)
                     }
+                    autoComplete="new-password"
                     className={`${fieldClass} pl-10 pr-10`}
                     required
+                    disabled={success}
                   />
 
                   <button
@@ -261,6 +272,7 @@ function ResetPassword() {
                         ? "Hide password"
                         : "Show password"
                     }
+                    disabled={success}
                     className={`absolute right-3 top-1/2 -translate-y-1/2 ${
                       darkMode
                         ? "text-[#C8B9C9] hover:text-white"
@@ -315,8 +327,10 @@ function ResetPassword() {
                         e.target.value
                       )
                     }
+                    autoComplete="new-password"
                     className={`${fieldClass} pl-10 pr-10`}
                     required
+                    disabled={success}
                   />
 
                   <button
@@ -331,6 +345,7 @@ function ResetPassword() {
                         ? "Hide password"
                         : "Show password"
                     }
+                    disabled={success}
                     className={`absolute right-3 top-1/2 -translate-y-1/2 ${
                       darkMode
                         ? "text-[#C8B9C9] hover:text-white"
@@ -377,11 +392,13 @@ function ResetPassword() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || success || !token}
                 className="w-full h-[42px] rounded-lg bg-gradient-to-r from-[#D21CFF] via-[#913CF5] to-[#477BFF] text-white text-[13px] font-semibold shadow-md shadow-purple-500/20 hover:brightness-110 active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading
                   ? "Resetting..."
+                  : success
+                  ? "Password Reset Successful"
                   : "Reset Password"}
               </button>
             </form>
