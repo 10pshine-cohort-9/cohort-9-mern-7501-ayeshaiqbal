@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff, Sun, Moon, BookOpen } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Sun,
+  Moon,
+  BookOpen,
+} from "lucide-react";
 import { loginUser } from "../api/authApi";
 import { useAuth } from "../context/useAuth";
 
@@ -10,6 +18,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState("");
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -27,7 +36,8 @@ function Login() {
 
     try {
       const data = await loginUser({ email, password });
-      login(data.user, data.token);
+
+      login(data.user, data.token, remember);
       navigate("/dashboard");
     } catch (err) {
       setError(
@@ -66,6 +76,7 @@ function Login() {
               aria-hidden="true"
               className={darkMode ? "text-white" : "text-[#111827]"}
             />
+
             <span
               className={`text-[20px] font-bold tracking-tight ${
                 darkMode ? "text-white" : "text-[#111827]"
@@ -104,6 +115,7 @@ function Login() {
             >
               Sign In
             </h1>
+
             <p
               className={`mt-1 text-[14px] font-medium ${
                 darkMode ? "text-white" : "text-[#1F2937]"
@@ -111,6 +123,7 @@ function Login() {
             >
               Welcome Back
             </p>
+
             <p
               className={`mt-1 text-[12px] ${
                 darkMode ? "text-[#918599]" : "text-[#737B87]"
@@ -128,6 +141,7 @@ function Login() {
             }`}
           >
             <form onSubmit={handleSubmit} className="space-y-3">
+              {/* Email */}
               <div>
                 <label
                   htmlFor="login-email"
@@ -137,12 +151,14 @@ function Login() {
                 >
                   Email Address
                 </label>
+
                 <div className="relative">
                   <Mail
                     size={16}
                     aria-hidden="true"
                     className={`absolute left-3 top-1/2 -translate-y-1/2 ${iconClass}`}
                   />
+
                   <input
                     id="login-email"
                     type="email"
@@ -155,6 +171,7 @@ function Login() {
                 </div>
               </div>
 
+              {/* Password */}
               <div>
                 <label
                   htmlFor="login-password"
@@ -164,12 +181,14 @@ function Login() {
                 >
                   Password
                 </label>
+
                 <div className="relative">
                   <Lock
                     size={16}
                     aria-hidden="true"
                     className={`absolute left-3 top-1/2 -translate-y-1/2 ${iconClass}`}
                   />
+
                   <input
                     id="login-password"
                     type={showPassword ? "text" : "password"}
@@ -179,6 +198,7 @@ function Login() {
                     className={`${fieldClass} pl-10 pr-10`}
                     required
                   />
+
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
@@ -200,26 +220,43 @@ function Login() {
                 </div>
               </div>
 
-              <label
-                htmlFor="remember-me"
-                className={`flex items-center gap-2 text-[11px] cursor-pointer pt-0.5 ${
-                  darkMode ? "text-[#9E91A3]" : "text-[#69717D]"
-                }`}
-              >
-                <input
-                  id="remember-me"
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                  className="w-3.5 h-3.5 accent-[#C837AB]"
-                />
-                Remember me
-              </label>
+              {/* Remember Me + Forgot Password */}
+              <div className="flex items-center justify-between pt-0.5">
+                <label
+                  htmlFor="remember-me"
+                  className={`flex items-center gap-2 text-[11px] cursor-pointer ${
+                    darkMode ? "text-[#9E91A3]" : "text-[#69717D]"
+                  }`}
+                >
+                  <input
+                    id="remember-me"
+                    type="checkbox"
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
+                    className="w-3.5 h-3.5 accent-[#C837AB]"
+                  />
 
+                  Remember me
+                </label>
+
+                <Link
+                  to="/forgot-password"
+                  className={`text-[11px] font-semibold hover:underline ${
+                    darkMode ? "text-[#D06BC4]" : "text-[#A855F7]"
+                  }`}
+                >
+                  Forgot Password?
+                </Link>
+              </div>
+
+              {/* Error */}
               {error && (
-                <p className="text-red-400 text-[12px] text-center">{error}</p>
+                <p className="text-red-400 text-[12px] text-center">
+                  {error}
+                </p>
               )}
 
+              {/* Sign In */}
               <button
                 type="submit"
                 className="w-full h-[42px] rounded-lg bg-gradient-to-r from-[#D21CFF] via-[#913CF5] to-[#477BFF] text-white text-[13px] font-semibold shadow-md shadow-purple-500/20 hover:brightness-110 active:scale-[0.99] transition-all"
@@ -229,6 +266,7 @@ function Login() {
             </form>
           </div>
 
+          {/* Sign Up */}
           <p
             className={`text-[12px] text-center mt-3 ${
               darkMode ? "text-[#8E8195]" : "text-[#707783]"
@@ -249,4 +287,3 @@ function Login() {
 }
 
 export default Login;
-
