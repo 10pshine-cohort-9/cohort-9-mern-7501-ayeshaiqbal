@@ -1,18 +1,31 @@
 const logger = require("../utils/logger");
 
 const errorHandler = (err, req, res, next) => {
+  const status =
+    Number.isInteger(err.status) &&
+    err.status >= 400 &&
+    err.status < 600
+      ? err.status
+      : 500;
+
   logger.error(
     {
       error: err.message,
-      stack: err.stack,
+      status,
+      method: req.method,
+      path: req.originalUrl,
     },
     "Unhandled Exception"
   );
 
-  const status = err.status || 500;
+  if (status >= 500) {
+    return res.status(status).json({
+      message: "Internal Server Error",
+    });
+  }
 
   return res.status(status).json({
-    message: status >= 500 ? "Internal Server Error" : err.message,
+    message: err.message || "Request failed",
   });
 };
 

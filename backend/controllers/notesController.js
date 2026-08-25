@@ -9,14 +9,27 @@ const {
 
 const addNote = (req, res, next) => {
   const { title, content } = req.body;
-  const userId = req.user.id;
+  const userId = req.user?.id;
+
+  if (!userId) {
+    logger.warn("Create note failed - user not authenticated");
+
+    return res.status(401).json({
+      message: "Unauthorized",
+    });
+  }
 
   logger.info({ userId }, "Create note attempt");
 
-  if (!title || !content) {
+  if (
+    typeof title !== "string" ||
+    typeof content !== "string" ||
+    !title.trim() ||
+    !content.trim()
+  ) {
     logger.warn(
       { userId },
-      "Create note failed - missing fields"
+      "Create note failed - invalid or missing fields"
     );
 
     return res.status(400).json({
@@ -24,33 +37,46 @@ const addNote = (req, res, next) => {
     });
   }
 
-  createNote(userId, title, content, (err) => {
-    if (err) {
-      logger.error(
-        {
-          error: err.message,
-          userId,
-        },
-        "Create note database error"
+  createNote(
+    userId,
+    title.trim(),
+    content.trim(),
+    (err) => {
+      if (err) {
+        logger.error(
+          {
+            error: err.message,
+            userId,
+          },
+          "Create note database error"
+        );
+
+        err.status = 500;
+        return next(err);
+      }
+
+      logger.info(
+        { userId },
+        "Note created successfully"
       );
 
-      err.status = 500;
-      return next(err);
+      return res.status(201).json({
+        message: "Note created successfully",
+      });
     }
-
-    logger.info(
-      { userId },
-      "Note created successfully"
-    );
-
-    return res.status(201).json({
-      message: "Note created successfully",
-    });
-  });
+  );
 };
 
 const getNotes = (req, res, next) => {
-  const userId = req.user.id;
+  const userId = req.user?.id;
+
+  if (!userId) {
+    logger.warn("Fetch notes failed - user not authenticated");
+
+    return res.status(401).json({
+      message: "Unauthorized",
+    });
+  }
 
   logger.info(
     { userId },
@@ -85,21 +111,45 @@ const getNotes = (req, res, next) => {
 
 const updateUserNote = (req, res, next) => {
   const { title, content } = req.body;
-  const userId = req.user.id;
+  const userId = req.user?.id;
   const noteId = req.params.id;
+
+  if (!userId) {
+    logger.warn("Update note failed - user not authenticated");
+
+    return res.status(401).json({
+      message: "Unauthorized",
+    });
+  }
+
+  if (!noteId) {
+    logger.warn(
+      { userId },
+      "Update note failed - note ID missing"
+    );
+
+    return res.status(400).json({
+      message: "Note ID is required",
+    });
+  }
 
   logger.info(
     { userId, noteId },
     "Update note attempt"
   );
 
-  if (!title || !content) {
+  if (
+    typeof title !== "string" ||
+    typeof content !== "string" ||
+    !title.trim() ||
+    !content.trim()
+  ) {
     logger.warn(
       {
         userId,
         noteId,
       },
-      "Update note failed - missing fields"
+      "Update note failed - invalid or missing fields"
     );
 
     return res.status(400).json({
@@ -110,8 +160,8 @@ const updateUserNote = (req, res, next) => {
   updateNote(
     noteId,
     userId,
-    title,
-    content,
+    title.trim(),
+    content.trim(),
     (err, result) => {
       if (err) {
         logger.error(
@@ -158,7 +208,26 @@ const updateUserNote = (req, res, next) => {
 
 const deleteUserNote = (req, res, next) => {
   const noteId = req.params.id;
-  const userId = req.user.id;
+  const userId = req.user?.id;
+
+  if (!userId) {
+    logger.warn("Delete note failed - user not authenticated");
+
+    return res.status(401).json({
+      message: "Unauthorized",
+    });
+  }
+
+  if (!noteId) {
+    logger.warn(
+      { userId },
+      "Delete note failed - note ID missing"
+    );
+
+    return res.status(400).json({
+      message: "Note ID is required",
+    });
+  }
 
   logger.info(
     { userId, noteId },
