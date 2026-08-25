@@ -15,7 +15,7 @@ const { sendResetEmail } = require("../utils/mailer");
 const signup = (req, res, next) => {
   const { name, email, password } = req.body;
 
-  logger.info({ email }, "Signup attempt");
+  logger.info("Signup attempt");
 
   if (!name || !email || !password) {
     logger.warn("Signup failed - required fields missing");
@@ -66,10 +66,7 @@ const signup = (req, res, next) => {
           return next(err);
         }
 
-        logger.info(
-          { email },
-          "User signup successful"
-        );
+        logger.info("User signup successful");
 
         return res.status(201).json({
           message: "User registered successfully",
@@ -90,7 +87,7 @@ const signup = (req, res, next) => {
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
-  logger.info({ email }, "Login attempt");
+  logger.info("Login attempt");
 
   if (!email || !password) {
     logger.warn("Login failed - missing credentials");

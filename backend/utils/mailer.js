@@ -23,7 +23,27 @@ const transporter = nodemailer.createTransport({
     user: emailUser,
     pass: emailPassword,
   },
+  connectionTimeout: 60000,
+  greetingTimeout: 30000,
+  socketTimeout: 300000,
 });
+
+const verifyEmailTransporter = async () => {
+  try {
+    await transporter.verify();
+
+    logger.info("Email transporter verified successfully.");
+  } catch (error) {
+    logger.error(
+      {
+        error: error.message,
+      },
+      "Email transporter verification failed."
+    );
+
+    throw error;
+  }
+};
 
 const sendResetEmail = async (email, resetToken) => {
   if (!email || !resetToken) {
@@ -91,9 +111,7 @@ const sendResetEmail = async (email, resetToken) => {
   try {
     await transporter.sendMail(mailOptions);
 
-    logger.info(
-      "Password reset email sent successfully"
-    );
+    logger.info("Password reset email sent successfully");
   } catch (error) {
     logger.error(
       {
@@ -108,4 +126,5 @@ const sendResetEmail = async (email, resetToken) => {
 
 module.exports = {
   sendResetEmail,
+  verifyEmailTransporter,
 };
