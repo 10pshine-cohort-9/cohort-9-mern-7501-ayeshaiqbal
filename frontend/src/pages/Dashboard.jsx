@@ -6,7 +6,6 @@ import { TextStyle, FontSize } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
-import Image from "@tiptap/extension-image";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -31,7 +30,6 @@ import {
   Underline as UnderlineIcon,
   Minus,
   Plus as PlusIcon,
-  ImagePlus,
   List,
   ListOrdered,
   Highlighter,
@@ -53,7 +51,6 @@ import {
   Upload,
   FileText,
   Check,
-  Eye,
 } from "lucide-react";
 
 import { useAuth } from "../context/useAuth";
@@ -63,49 +60,6 @@ import {
   updateNote,
   deleteNote,
 } from "../api/notesApi";
-const ResizableImage = Image.extend({
-  addAttributes() {
-    return {
-      ...this.parent?.(),
-
-      width: {
-        default: "420",
-
-        parseHTML: (element) =>
-          element.getAttribute("width") ||
-          element.style.width?.replace("px", "") ||
-          "420",
-
-        renderHTML: (attributes) => {
-          if (!attributes.width) {
-            return {};
-          }
-
-          return {
-            width: attributes.width,
-          };
-        },
-      },
-
-      height: {
-        default: null,
-
-        parseHTML: (element) =>
-          element.getAttribute("height") || null,
-
-        renderHTML: (attributes) => {
-          if (!attributes.height) {
-            return {};
-          }
-
-          return {
-            height: attributes.height,
-          };
-        },
-      },
-    };
-  },
-});
 
 function Dashboard() {
   const { user, logout } = useAuth();
@@ -142,8 +96,6 @@ function Dashboard() {
 
   const [fontSize, setFontSize] = useState(16);
 
-  const [selectedImage, setSelectedImage] = useState(false);
-  const [imageWidth, setImageWidth] = useState(420);
   const getStoredNoteSettings = () => {
     try {
       return JSON.parse(
@@ -215,11 +167,6 @@ function Dashboard() {
         defaultProtocol: "https",
       }),
 
-      ResizableImage.configure({
-        inline: false,
-        allowBase64: true,
-      }),
-
       TaskList,
 
       TaskItem.configure({
@@ -231,34 +178,6 @@ function Dashboard() {
 
     onUpdate: ({ editor: currentEditor }) => {
       setContent(currentEditor.getHTML());
-
-      const node = currentEditor.state.selection.node;
-
-      if (node?.type?.name === "image") {
-        setSelectedImage(true);
-
-        const width =
-          Number(node.attrs.width) || 420;
-
-        setImageWidth(width);
-      } else {
-        setSelectedImage(false);
-      }
-    },
-
-    onSelectionUpdate: ({ editor: currentEditor }) => {
-      const node = currentEditor.state.selection.node;
-
-      if (node?.type?.name === "image") {
-        setSelectedImage(true);
-
-        const width =
-          Number(node.attrs.width) || 420;
-
-        setImageWidth(width);
-      } else {
-        setSelectedImage(false);
-      }
     },
   });
 
@@ -447,9 +366,6 @@ function Dashboard() {
 
     setFontSize(16);
 
-    setSelectedImage(false);
-    setImageWidth(420);
-
     setShowEditor(true);
 
     if (editor) {
@@ -471,9 +387,6 @@ function Dashboard() {
     clearMessages();
 
     setFontSize(16);
-
-    setSelectedImage(false);
-    setImageWidth(420);
 
     setShowEditor(true);
 
@@ -500,9 +413,6 @@ function Dashboard() {
     setContent("");
 
     setFontSize(16);
-
-    setSelectedImage(false);
-    setImageWidth(420);
 
     clearMessages();
 
@@ -964,107 +874,6 @@ function Dashboard() {
       .setFontSize(`${newSize}px`)
       .run();
   };
-  const handleImageUpload = (event) => {
-    const file =
-      event.target.files?.[0];
-
-    if (!file || !editor) {
-      return;
-    }
-
-    clearMessages();
-
-    if (!file.type.startsWith("image/")) {
-      setError(
-        "Please select a valid image file."
-      );
-
-      event.target.value = "";
-
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      setError(
-        "Image must be smaller than 5MB."
-      );
-
-      event.target.value = "";
-
-      return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      editor
-        .chain()
-        .focus()
-        .setImage({
-          src: reader.result,
-          alt: file.name,
-          width: "420",
-        })
-        .run();
-    };
-
-    reader.readAsDataURL(file);
-
-    event.target.value = "";
-  };
-  const resizeSelectedImage = (width) => {
-    if (!editor) {
-      return;
-    }
-
-    const node =
-      editor.state.selection.node;
-
-    if (
-      !node ||
-      node.type.name !== "image"
-    ) {
-      return;
-    }
-
-    editor
-      .chain()
-      .focus()
-      .updateAttributes("image", {
-        width: String(width),
-        height: null,
-      })
-      .run();
-
-    setImageWidth(width);
-
-    setSelectedImage(true);
-  };
-  const deleteSelectedImage = () => {
-    if (!editor) {
-      return;
-    }
-
-    const node =
-      editor.state.selection.node;
-
-    if (
-      !node ||
-      node.type.name !== "image"
-    ) {
-      return;
-    }
-
-    editor
-      .chain()
-      .focus()
-      .deleteSelection()
-      .run();
-
-    setSelectedImage(false);
-
-    setImageWidth(420);
-  };
   const handleTextColor = (event) => {
     if (!editor) {
       return;
@@ -1202,11 +1011,6 @@ body {
   margin: 40px auto;
   padding: 0 20px;
   line-height: 1.7;
-}
-img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 10px;
 }
 </style>
 </head>
@@ -2232,14 +2036,7 @@ ${note.content || ""}
                           : "border-gray-100 text-[#9AA1AC]"
                       }`}
                     >
-                      <span>
-                        {note.content
-                          ?.includes(
-                            "<img"
-                          )
-                          ? "Text + Image"
-                          : "Text note"}
-                      </span>
+                      <span>Text note</span>
 
                       {archived && (
                         <span className="flex items-center gap-1">
@@ -2788,151 +2585,6 @@ ${note.content || ""}
                         size={17}
                       />
                     </button>
-
-                    <div className="toolbar-divider" />
-                    <label
-                      htmlFor="note-image-upload"
-                      title="Insert image"
-                      className="toolbar-button cursor-pointer"
-                    >
-                      <ImagePlus
-                        size={17}
-                      />
-                    </label>
-
-                    <input
-                      id="note-image-upload"
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp,image/gif"
-                      onChange={
-                        handleImageUpload
-                      }
-                      className="hidden"
-                    />
-                    {selectedImage && (
-                      <>
-                        <div className="toolbar-divider" />
-
-                        <div
-                          className={`image-controls ${
-                            darkMode
-                              ? "image-controls-dark"
-                              : "image-controls-light"
-                          }`}
-                        >
-                          <span className="image-control-label">
-                            Image
-                          </span>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              resizeSelectedImage(
-                                180
-                              )
-                            }
-                            title="Small image"
-                            className={`image-size-button ${
-                              imageWidth ===
-                              180
-                                ? "image-size-active"
-                                : ""
-                            }`}
-                          >
-                            S
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              resizeSelectedImage(
-                                320
-                              )
-                            }
-                            title="Medium image"
-                            className={`image-size-button ${
-                              imageWidth ===
-                              320
-                                ? "image-size-active"
-                                : ""
-                            }`}
-                          >
-                            M
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              resizeSelectedImage(
-                                520
-                              )
-                            }
-                            title="Large image"
-                            className={`image-size-button ${
-                              imageWidth ===
-                              520
-                                ? "image-size-active"
-                                : ""
-                            }`}
-                          >
-                            L
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              resizeSelectedImage(
-                                700
-                              )
-                            }
-                            title="Extra large image"
-                            className={`image-size-button ${
-                              imageWidth ===
-                              700
-                                ? "image-size-active"
-                                : ""
-                            }`}
-                          >
-                            XL
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={
-                              deleteSelectedImage
-                            }
-                            title="Delete selected image"
-                            aria-label="Delete selected image"
-                            className="image-delete-button"
-                          >
-                            <Trash2
-                              size={14}
-                            />
-
-                            <span>
-                              Delete
-                            </span>
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
-                {selectedImage && (
-                  <div
-                    className={`mt-2 px-3 py-2 rounded-lg text-[11px] flex items-center gap-2 ${
-                      darkMode
-                        ? "bg-[#24152A] text-[#C9AFC6]"
-                        : "bg-purple-50 text-purple-700"
-                    }`}
-                  >
-                    <Eye size={13} />
-
-                    <span>
-                      Image selected — choose
-                      S, M, L or XL to resize,
-                      or Delete to remove it.
-                    </span>
                   </div>
                 )}
                 <div
@@ -3680,68 +3332,6 @@ ${note.content || ""}
           opacity: 0;
           cursor: pointer;
         }
-        .image-controls {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          padding-left: 2px;
-          flex-wrap: wrap;
-        }
-
-        .image-control-label {
-          font-size: 10px;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          margin-right: 3px;
-          opacity: 0.6;
-        }
-
-        .image-size-button {
-          min-width: 29px;
-          height: 28px;
-          padding: 0 7px;
-          border-radius: 7px;
-          border: 1px solid rgba(128,128,128,0.25);
-          background: transparent;
-          font-size: 10px;
-          font-weight: 800;
-          cursor: pointer;
-          transition: all 0.15s ease;
-        }
-
-        .image-size-button:hover {
-          background: rgba(200,55,171,0.1);
-          border-color: #C837AB;
-          color: #C837AB;
-        }
-
-        .image-size-active {
-          background: rgba(200,55,171,0.12);
-          border-color: #C837AB;
-          color: #C837AB;
-        }
-
-        .image-delete-button {
-          height: 28px;
-          padding: 0 9px;
-          border-radius: 7px;
-          border: 1px solid rgba(239,68,68,0.25);
-          color: #EF4444;
-          background: rgba(239,68,68,0.06);
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          font-size: 10px;
-          font-weight: 800;
-          cursor: pointer;
-          transition: all 0.15s ease;
-        }
-
-        .image-delete-button:hover {
-          background: rgba(239,68,68,0.14);
-          border-color: rgba(239,68,68,0.45);
-        }
         .tiptap-editor .ProseMirror {
           color: #1F2937;
           min-height: 300px;
@@ -3845,29 +3435,6 @@ ${note.content || ""}
           padding: 0;
           color: inherit;
         }
-        .tiptap-editor .ProseMirror img {
-          display: block;
-          max-width: 100%;
-          height: auto;
-          border-radius: 12px;
-          margin: 14px 0;
-          cursor: pointer;
-          transition:
-            box-shadow 0.18s ease,
-            opacity 0.18s ease,
-            transform 0.18s ease;
-        }
-
-        .tiptap-editor .ProseMirror img:hover {
-          opacity: 0.96;
-        }
-
-        .tiptap-editor .ProseMirror img.ProseMirror-selectednode {
-          outline: 3px solid #C837AB;
-          outline-offset: 4px;
-          box-shadow:
-            0 0 0 7px rgba(200,55,171,0.12);
-        }
 
         .tiptap-editor .ProseMirror a {
           color: #C837AB;
@@ -3969,21 +3536,6 @@ ${note.content || ""}
           .toolbar-divider {
             height: 20px;
             margin: 0 2px;
-          }
-
-          .image-controls {
-            width: 100%;
-            padding: 7px 0 2px;
-            border-top: 1px solid rgba(128,128,128,0.18);
-            margin-top: 4px;
-          }
-
-          .image-control-label {
-            margin-right: auto;
-          }
-
-          .image-delete-button span {
-            display: inline;
           }
 
           .tiptap-editor .ProseMirror h1 {
