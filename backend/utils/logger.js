@@ -1,25 +1,30 @@
 const pino = require("pino");
 
 const logger = pino({
-    level: "info",
+  level: process.env.LOG_LEVEL || "info",
 
-   redact: {
+  redact: {
     paths: [
-        "email",
-        "userId",
-        "noteId",
-        "req.headers.authorization",
-        "res.headers.authorization",
+      "email",
+      "userId",
+      "noteId",
+      "token",
+      "resetToken",
+      "password",
+      "req.headers.authorization",
+      "res.headers.authorization",
     ],
     censor: "***",
-},
+  },
 
-    transport: {
-        target: "pino-pretty",
-        options: {
-            colorize: true,
-        },
+  transport: {
+    target: "pino-pretty",
+    options: {
+      colorize: true,
+      translateTime: "SYS:standard",
+      singleLine: true,
     },
+  },
 });
 
 module.exports = logger;

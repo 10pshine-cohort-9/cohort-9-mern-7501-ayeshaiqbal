@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const { connectDB } = require("./config/db");
+const { verifyEmailTransporter } = require("./utils/mailer");
 const app = require("./app");
 
 const port = process.env.PORT || 3000;
@@ -22,14 +23,20 @@ for (const key of requiredEnv) {
   }
 }
 
-connectDB()
-  .then(() => {
+const startServer = async () => {
+  try {
+    await connectDB();
+
+    await verifyEmailTransporter();
+
     app.listen(port, () => {
       console.log(`Server started on port ${port}`);
     });
-  })
-  .catch((err) => {
-    console.error("Server not started due to database error");
+  } catch (err) {
+    console.error("Server not started due to startup error");
     console.error(err);
     process.exit(1);
-  });
+  }
+};
+
+startServer();

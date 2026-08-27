@@ -1,27 +1,81 @@
 const nodemailer = require("nodemailer");
 const logger = require("./logger");
 
+const emailUser = process.env.EMAIL_USER;
+const emailPassword = process.env.EMAIL_PASS;
+const frontendUrl = process.env.FRONTEND_URL;
+
+if (!emailUser || !emailPassword) {
+  logger.warn(
+    "Email configuration is missing. Password reset emails may not work."
+  );
+}
+
+if (!frontendUrl) {
+  logger.warn(
+    "FRONTEND_URL is missing. Password reset links may not work."
+  );
+}
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: emailUser,
+    pass: emailPassword,
   },
+  connectionTimeout: 60000,
+  greetingTimeout: 30000,
+  socketTimeout: 300000,
 });
 
+const verifyEmailTransporter = async () => {
+  try {
+    await transporter.verify();
+
+    logger.info("Email transporter verified successfully.");
+  } catch (error) {
+    logger.error(
+      {
+        error: error.message,
+      },
+      "Email transporter verification failed."
+    );
+
+    throw error;
+  }
+};
+
 const sendResetEmail = async (email, resetToken) => {
-  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${encodeURIComponent(resetToken)}`;
+  if (!email || !resetToken) {
+    throw new Error("Email and reset token are required");
+  }
+
+  if (!frontendUrl) {
+    throw new Error("FRONTEND_URL is not configured");
+  }
+
+  const resetLink =
+    `${frontendUrl.replace(/\/$/, "")}` +
+    `/reset-password?token=${encodeURIComponent(resetToken)}`;
 
   const mailOptions = {
-    from: `"Notes App" <${process.env.EMAIL_USER}>`,
+    from: `"Notes App" <${emailUser}>`,
     to: email,
     subject: "Notes App - Password Reset",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
         <h2>Reset Your Password</h2>
+
         <p>Hello,</p>
-        <p>We received a request to reset your Notes App password.</p>
-        <p>Click the button below to create a new password:</p>
+
+        <p>
+          We received a request to reset your Notes App password.
+        </p>
+
+        <p>
+          Click the button below to create a new password:
+        </p>
+
         <a
           href="${resetLink}"
           style="
@@ -36,12 +90,16 @@ const sendResetEmail = async (email, resetToken) => {
         >
           Reset Password
         </a>
+
         <p style="margin-top: 20px;">
           This link will expire in <strong>15 minutes</strong>.
         </p>
+
         <p>
-          If you did not request a password reset, you can safely ignore this email.
+          If you did not request a password reset,
+          you can safely ignore this email.
         </p>
+
         <p>
           Regards,<br />
           Notes App Team
@@ -52,11 +110,12 @@ const sendResetEmail = async (email, resetToken) => {
 
   try {
     await transporter.sendMail(mailOptions);
+
+    logger.info("Password reset email sent successfully");
   } catch (error) {
     logger.error(
       {
         error: error.message,
-        email,
       },
       "Password reset email delivery failed"
     );
@@ -67,4 +126,5 @@ const sendResetEmail = async (email, resetToken) => {
 
 module.exports = {
   sendResetEmail,
+  verifyEmailTransporter,
 };

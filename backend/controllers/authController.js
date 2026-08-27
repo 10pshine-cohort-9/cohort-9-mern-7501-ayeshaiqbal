@@ -15,7 +15,7 @@ const { sendResetEmail } = require("../utils/mailer");
 const signup = (req, res, next) => {
   const { name, email, password } = req.body;
 
-  logger.info({ email }, "Signup attempt");
+  logger.info("Signup attempt");
 
   if (!name || !email || !password) {
     logger.warn("Signup failed - required fields missing");
@@ -66,10 +66,7 @@ const signup = (req, res, next) => {
           return next(err);
         }
 
-        logger.info(
-          { email },
-          "User signup successful"
-        );
+        logger.info("User signup successful");
 
         return res.status(201).json({
           message: "User registered successfully",
@@ -90,7 +87,7 @@ const signup = (req, res, next) => {
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
-  logger.info({ email }, "Login attempt");
+  logger.info("Login attempt");
 
   if (!email || !password) {
     logger.warn("Login failed - missing credentials");
@@ -114,7 +111,7 @@ const login = (req, res, next) => {
     if (result.length === 0) {
       logger.warn("Login failed - invalid credentials");
 
-      return res.status(400).json({
+      return res.status(401).json({
         message: "Invalid email or password",
       });
     }
@@ -130,7 +127,7 @@ const login = (req, res, next) => {
       if (!isPasswordCorrect) {
         logger.warn("Login failed - invalid credentials");
 
-        return res.status(400).json({
+        return res.status(401).json({
           message: "Invalid email or password",
         });
       }
@@ -204,8 +201,10 @@ const forgotPassword = (req, res, next) => {
       return next(err);
     }
 
-    // Return the same response whether the email exists or not
-    // to prevent email enumeration.
+    /*
+     * Always return the same response whether the email
+     * exists or not to prevent email enumeration.
+     */
     if (result.length === 0) {
       logger.info(
         "Forgot password request completed"
@@ -218,58 +217,68 @@ const forgotPassword = (req, res, next) => {
 
     const user = result[0];
 
-    const resetToken = jwt.sign(
-      { id: user.id },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "15m",
-      }
-    );
-
-    const expiry = new Date(
-      Date.now() + 15 * 60 * 1000
-    );
-
-    saveResetToken(
-      user.id,
-      resetToken,
-      expiry,
-      async (err) => {
-        if (err) {
-          logger.error(
-            { error: err.message },
-            "Failed to save reset token"
-          );
-
-          err.status = 500;
-          return next(err);
+    try {
+      const resetToken = jwt.sign(
+        { id: user.id },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "15m",
         }
+      );
 
-        try {
-          await sendResetEmail(
-            user.email,
-            resetToken
-          );
+      const expiry = new Date(
+        Date.now() + 15 * 60 * 1000
+      );
 
-          logger.info(
-            { userId: user.id },
-            "Password reset email sent successfully"
-          );
+      saveResetToken(
+        user.id,
+        resetToken,
+        expiry,
+        async (err) => {
+          if (err) {
+            logger.error(
+              { error: err.message },
+              "Failed to save reset token"
+            );
 
-          return res.status(200).json({
-            message: genericMessage,
-          });
-        } catch (error) {
-          logger.error(
-            { error: error.message },
-            "Failed to send password reset email"
-          );
+            err.status = 500;
+            return next(err);
+          }
 
-          error.status = 500;
-          return next(error);
+          try {
+            await sendResetEmail(
+              user.email,
+              resetToken
+            );
+
+            logger.info(
+              { userId: user.id },
+              "Password reset email sent successfully"
+            );
+
+            return res.status(200).json({
+              message: genericMessage,
+            });
+          } catch (error) {
+            logger.error(
+              { error: error.message },
+              "Failed to send password reset email"
+            );
+
+            error.status = 500;
+            return next(error);
+          }
         }
-      }
-    );
+      );
+    } catch (error) {
+      logger.error(
+        { error: error.message },
+        "Failed to generate reset token"
+      );
+
+      error.status = 500;
+      return next(error);
+    }
   });
 };
 
@@ -346,7 +355,10 @@ const resetPassword = async (req, res, next) => {
               return next(err);
             }
 
-            // Token must still be valid and unused.
+            /*
+             * affectedRows = 0 means the token was already
+             * used or has expired.
+             */
             if (result.affectedRows === 0) {
               logger.warn(
                 "Password reset failed - token expired or already used"
