@@ -2,3 +2,9 @@ node_modules/
 .env
 dist/
 .vscode/
+# SonarQube and test coverage
+.scannerwork/
+.nyc_output/
+backend/.nyc_output/
+backend/coverage/
+frontend/coverage/
